@@ -1,0 +1,21 @@
+# Environment files (contain secrets)
+.env
+**/.env
+
+# Traefik
+traefik/acme.json
+traefik/logs/
+
+# Application data
+uptime-kuma/data/
+
+# Database init scripts (contain passwords)
+**/init-scripts/**/*.sql
+!**/init-scripts/**/*.sql.example
+
+# Database dumps
+*.dump
+
+# Backups
+*.bak
+*.backup

@@ -1,0 +1,17 @@
+-- PostgreSQL Init Script
+-- Copy to init-databases.sql and update passwords
+
+-- Zammad
+CREATE USER zammad WITH PASSWORD 'your-zammad-db-password';
+CREATE DATABASE zammad OWNER zammad;
+GRANT ALL PRIVILEGES ON DATABASE zammad TO zammad;
+
+-- Authentik
+CREATE USER authentik WITH PASSWORD 'your-authentik-db-password';
+CREATE DATABASE authentik OWNER authentik;
+GRANT ALL PRIVILEGES ON DATABASE authentik TO authentik;
+
+-- Future apps can be added here:
+-- CREATE USER appname WITH PASSWORD 'password';
+-- CREATE DATABASE appname OWNER appname;
+-- GRANT ALL PRIVILEGES ON DATABASE appname TO appname;

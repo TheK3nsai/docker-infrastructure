@@ -1,0 +1,109 @@
+# Zammad Docker Compose - Using Shared PostgreSQL + Redis
+# ~/docker/zammad/docker-compose.yml
+
+x-zammad-service: &zammad-service
+  image: ${IMAGE_REPO:-ghcr.io/zammad/zammad}:${VERSION:-6.5.2-46}
+  restart: ${RESTART:-unless-stopped}
+  environment: &zammad-environment
+    POSTGRESQL_HOST: shared-postgres
+    POSTGRESQL_USER: ${POSTGRES_USER:-zammad}
+    POSTGRESQL_PASS: ${POSTGRES_PASS}
+    POSTGRESQL_DB: ${POSTGRES_DB:-zammad}
+    MEMCACHE_SERVERS: ${MEMCACHE_SERVERS:-zammad-memcached:11211}
+    REDIS_URL: redis://shared-redis:6379/2
+    ELASTICSEARCH_HOST: zammad-elasticsearch
+    ELASTICSEARCH_PORT: 9200
+  volumes:
+    - zammad-storage:/opt/zammad/storage
+  depends_on:
+    - zammad-memcached
+  networks:
+    - zammad-internal
+    - shared-db
+
+services:
+  zammad-elasticsearch:
+    image: elasticsearch:${ELASTICSEARCH_VERSION:-8.15.0}
+    container_name: zammad-elasticsearch
+    restart: ${RESTART:-unless-stopped}
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: ${ELASTICSEARCH_JAVA_OPTS:--Xms512m -Xmx512m}
+    volumes:
+      - zammad-es:/usr/share/elasticsearch/data
+    networks:
+      - zammad-internal
+
+  zammad-memcached:
+    image: memcached:${MEMCACHE_VERSION:-1.6-alpine}
+    container_name: zammad-memcached
+    restart: ${RESTART:-unless-stopped}
+    command: memcached -m 64
+    networks:
+      - zammad-internal
+
+  zammad-init:
+    <<: *zammad-service
+    container_name: zammad-init
+    command: ["zammad-init"]
+    restart: on-failure
+    user: 0:0
+    depends_on:
+      - zammad-elasticsearch
+      - zammad-memcached
+
+  zammad-nginx:
+    <<: *zammad-service
+    container_name: zammad-nginx
+    command: ["zammad-nginx"]
+    environment:
+      <<: *zammad-environment
+      NGINX_SERVER_NAME: ${NGINX_SERVER_NAME:-tickets.kensai.cloud}
+      NGINX_SERVER_SCHEME: ${NGINX_SERVER_SCHEME:-https}
+      RAILS_TRUSTED_PROXIES: ${RAILS_TRUSTED_PROXIES:-172.16.0.0/12}
+    depends_on:
+      - zammad-railsserver
+    networks:
+      - zammad-internal
+      - shared-db
+      - traefik-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.zammad.rule=Host(`${NGINX_SERVER_NAME:-tickets.kensai.cloud}`)"
+      - "traefik.http.routers.zammad.entrypoints=websecure"
+      - "traefik.http.routers.zammad.tls.certresolver=letsencrypt"
+      - "traefik.http.services.zammad.loadbalancer.server.port=8080"
+      - "traefik.http.routers.zammad.middlewares=security-headers@file"
+
+  zammad-railsserver:
+    <<: *zammad-service
+    container_name: zammad-railsserver
+    command: ["zammad-railsserver"]
+    depends_on:
+      - zammad-init
+
+  zammad-scheduler:
+    <<: *zammad-service
+    container_name: zammad-scheduler
+    command: ["zammad-scheduler"]
+    depends_on:
+      - zammad-init
+
+  zammad-websocket:
+    <<: *zammad-service
+    container_name: zammad-websocket
+    command: ["zammad-websocket"]
+    depends_on:
+      - zammad-init
+
+volumes:
+  zammad-es:
+  zammad-storage:
+
+networks:
+  zammad-internal:
+  shared-db:
+    external: true
+  traefik-net:
+    external: true
