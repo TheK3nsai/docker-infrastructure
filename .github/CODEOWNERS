@@ -1,0 +1,14 @@
+# Default owner for everything
+* @TheK3nsai
+
+# Infrastructure
+/traefik/ @TheK3nsai
+/shared-services/ @TheK3nsai
+
+# Applications
+/nextcloud/ @TheK3nsai
+/uptime-kuma/ @TheK3nsai
+/zammad/ @TheK3nsai
+
+# CI/CD
+/.github/ @TheK3nsai
