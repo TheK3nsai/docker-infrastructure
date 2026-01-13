@@ -1,6 +1,6 @@
 services:
   socket-proxy:
-    image: tecnativa/docker-socket-proxy:latest
+    image: tecnativa/docker-socket-proxy:0.3
     container_name: socket-proxy
     restart: unless-stopped
     security_opt:
@@ -21,7 +21,7 @@ services:
       - socket-proxy
 
   traefik:
-    image: traefik:v3.6
+    image: traefik:v3.6.6
     container_name: traefik
     restart: unless-stopped
     security_opt:

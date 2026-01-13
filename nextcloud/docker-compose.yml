@@ -3,7 +3,7 @@
 
 services:
   nextcloud:
-    image: nextcloud
+    image: nextcloud:31
     container_name: nextcloud
     restart: unless-stopped
     volumes:
@@ -34,7 +34,7 @@ services:
       - "traefik.http.routers.nextcloud.middlewares=security-headers@file"
 
   nextcloud-cron:
-    image: nextcloud
+    image: nextcloud:31
     container_name: nextcloud-cron
     restart: unless-stopped
     volumes:

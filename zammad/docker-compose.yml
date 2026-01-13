@@ -2,7 +2,7 @@
 # ~/docker/zammad/docker-compose.yml
 
 x-zammad-service: &zammad-service
-  image: ${IMAGE_REPO:-ghcr.io/zammad/zammad}:${VERSION:-6.5.2-46}
+  image: ${IMAGE_REPO:-ghcr.io/zammad/zammad}:${VERSION:-6.5.2-55}
   restart: ${RESTART:-unless-stopped}
   environment: &zammad-environment
     POSTGRESQL_HOST: shared-postgres
@@ -23,7 +23,7 @@ x-zammad-service: &zammad-service
 
 services:
   zammad-elasticsearch:
-    image: elasticsearch:${ELASTICSEARCH_VERSION:-8.15.0}
+    image: elasticsearch:${ELASTICSEARCH_VERSION:-8.18.0}
     container_name: zammad-elasticsearch
     restart: ${RESTART:-unless-stopped}
     environment:
