@@ -37,13 +37,14 @@ services:
       - traefik-net
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=traefik-net"
       - "traefik.http.routers.netbox.rule=Host(`netbox.kensai.cloud`)"
       - "traefik.http.routers.netbox.entrypoints=websecure"
       - "traefik.http.routers.netbox.tls.certresolver=letsencrypt"
       - "traefik.http.services.netbox.loadbalancer.server.port=8080"
       - "traefik.http.routers.netbox.middlewares=security-headers@file"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/api/"]
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/login/"]
       interval: 30s
       timeout: 10s
       retries: 5

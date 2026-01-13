@@ -9,7 +9,7 @@ services:
       CONTAINERS: 1
       SERVICES: 0
       TASKS: 0
-      NETWORKS: 0
+      NETWORKS: 1
       NODES: 0
       INFO: 0
       IMAGES: 0
@@ -41,7 +41,6 @@ services:
     networks:
       - socket-proxy
       - traefik-net
-      - shared-db
     labels:
       - "traefik.enable=true"
       # Dashboard router - protected by Authentik
@@ -60,5 +59,3 @@ networks:
     ipam:
       config:
         - subnet: 172.19.0.0/24
-  shared-db:
-    external: true
