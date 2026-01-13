@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Traefik Documentation
+    url: https://doc.traefik.io/traefik/
+    about: Official Traefik documentation
+  - name: Authentik Documentation
+    url: https://docs.goauthentik.io/
+    about: Official Authentik documentation
