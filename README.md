@@ -11,29 +11,30 @@ Self-hosted Docker infrastructure with Traefik reverse proxy, shared databases, 
 | Nextcloud | cloud.kensai.cloud | File sync and collaboration |
 | Uptime Kuma | uptime.kensai.cloud | Monitoring dashboard |
 | Zammad | tickets.kensai.cloud | Helpdesk / ticketing system |
+| NetBox | netbox.kensai.cloud | IPAM / DCIM infrastructure management |
 
 ## Architecture
 
 ```
-                    ┌─────────────────────────────────────────┐
-                    │              Internet                    │
-                    └───────────────────┬─────────────────────┘
-                                        │ :80/:443
-                    ┌───────────────────▼─────────────────────┐
-                    │              Traefik                     │
-                    │         (reverse proxy)                  │
-                    └───────────────────┬─────────────────────┘
-                                        │ traefik-net
-          ┌─────────────┬───────────────┼───────────────┬─────────────┐
-          ▼             ▼               ▼               ▼             ▼
-    ┌──────────┐  ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐
-    │ Authentik│  │ Nextcloud│   │  Zammad  │   │  Uptime  │   │  Future  │
-    │   SSO    │  │          │   │          │   │   Kuma   │   │  Apps    │
-    └────┬─────┘  └────┬─────┘   └────┬─────┘   └──────────┘   └────┬─────┘
-         │             │              │                              │
-         └─────────────┴──────────────┴──────────────────────────────┘
-                                      │ shared-db
-                    ┌─────────────────┴─────────────────┐
+                         ┌─────────────────────────────────────────┐
+                         │              Internet                    │
+                         └───────────────────┬─────────────────────┘
+                                             │ :80/:443
+                         ┌───────────────────▼─────────────────────┐
+                         │              Traefik                     │
+                         │         (reverse proxy)                  │
+                         └───────────────────┬─────────────────────┘
+                                             │ traefik-net
+      ┌──────────────┬───────────────┬───────┴───────┬───────────────┬──────────────┐
+      ▼              ▼               ▼               ▼               ▼              ▼
+┌──────────┐  ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐
+│ Authentik│  │ Nextcloud│   │  Zammad  │   │  Uptime  │   │  NetBox  │   │  Future  │
+│   SSO    │  │          │   │          │   │   Kuma   │   │IPAM/DCIM │   │  Apps    │
+└────┬─────┘  └────┬─────┘   └────┬─────┘   └──────────┘   └────┬─────┘   └────┬─────┘
+     │             │              │                              │              │
+     └─────────────┴──────────────┴──────────────────────────────┴──────────────┘
+                                  │ shared-db
+                    ┌─────────────┴─────────────────┐
                     │         Shared Services           │
                     │  PostgreSQL │ MariaDB │ Redis     │
                     └───────────────────────────────────┘
@@ -54,6 +55,7 @@ Self-hosted Docker infrastructure with Traefik reverse proxy, shared databases, 
 cp shared-services/.env.example shared-services/.env
 cp nextcloud/.env.example nextcloud/.env
 cp zammad/.env.example zammad/.env
+cp netbox/.env.example netbox/.env
 ```
 
 ### 2. Set up Traefik certificates file
@@ -79,6 +81,7 @@ docker compose -f shared-services/docker-compose.yml ps
 docker compose -f nextcloud/docker-compose.yml up -d
 docker compose -f uptime-kuma/docker-compose.yml up -d
 docker compose -f zammad/docker-compose.yml up -d
+docker compose -f netbox/docker-compose.yml up -d
 ```
 
 ### 4. Initial Authentik setup
@@ -107,7 +110,10 @@ docker/
 │   └── .env
 ├── uptime-kuma/
 │   └── docker-compose.yml
-└── zammad/
+├── zammad/
+│   ├── docker-compose.yml
+│   └── .env
+└── netbox/
     ├── docker-compose.yml
     └── .env
 ```
@@ -126,9 +132,10 @@ docker/
 |----------|--------|---------|
 | authentik | PostgreSQL | Authentik |
 | zammad | PostgreSQL | Zammad |
+| netbox | PostgreSQL | NetBox |
 | nextcloud | MariaDB | Nextcloud |
 
-Redis databases: 0=Nextcloud, 1=Authentik, 2=Zammad
+Redis databases: 0=Nextcloud, 1=Authentik, 2=Zammad, 3=NetBox, 4=NetBox-cache
 
 ## Common Operations
 
@@ -137,6 +144,7 @@ Redis databases: 0=Nextcloud, 1=Authentik, 2=Zammad
 docker logs -f traefik
 docker logs -f authentik-server
 docker logs -f nextcloud
+docker logs -f netbox
 ```
 
 ### Restart a stack
