@@ -26,6 +26,9 @@ CONTAINERS=(
     "zammad-railsserver"
     "zammad-scheduler"
     "zammad-websocket"
+    "netbox"
+    "netbox-worker"
+    "netbox-housekeeping"
 )
 
 check_container() {
@@ -75,6 +78,7 @@ echo "  Authentik:  https://auth.kensai.cloud"
 echo "  Nextcloud:  https://cloud.kensai.cloud"
 echo "  Uptime:     https://uptime.kensai.cloud"
 echo "  Zammad:     https://tickets.kensai.cloud"
+echo "  NetBox:     https://netbox.kensai.cloud"
 
 echo -e "\n${CYAN}=== Resource Usage ===${NC}\n"
 docker stats --no-stream --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}" | head -20

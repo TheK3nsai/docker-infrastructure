@@ -1,0 +1,91 @@
+# NetBox Docker Compose - Using Shared PostgreSQL + Redis
+# ~/docker/netbox/docker-compose.yml
+
+x-netbox-env: &netbox-env
+  CORS_ORIGIN_ALLOW_ALL: "true"
+  DB_HOST: shared-postgres
+  DB_NAME: ${NETBOX_DB:-netbox}
+  DB_USER: ${NETBOX_DB_USER:-netbox}
+  DB_PASSWORD: ${NETBOX_DB_PASSWORD}
+  REDIS_HOST: shared-redis
+  REDIS_DATABASE: 3
+  REDIS_CACHE_HOST: shared-redis
+  REDIS_CACHE_DATABASE: 4
+  SECRET_KEY: ${NETBOX_SECRET_KEY}
+  SUPERUSER_NAME: ${NETBOX_SUPERUSER:-admin}
+  SUPERUSER_EMAIL: ${NETBOX_SUPERUSER_EMAIL:-admin@kensai.cloud}
+  SUPERUSER_PASSWORD: ${NETBOX_SUPERUSER_PASSWORD}
+  ALLOWED_HOSTS: "*"
+  CSRF_TRUSTED_ORIGINS: "https://netbox.kensai.cloud"
+
+services:
+  netbox:
+    image: netboxcommunity/netbox:${NETBOX_VERSION:-v4.4-3.4.2}
+    container_name: netbox
+    restart: unless-stopped
+    environment:
+      <<: *netbox-env
+    volumes:
+      - netbox-media:/opt/netbox/netbox/media
+      - netbox-reports:/opt/netbox/netbox/reports
+      - netbox-scripts:/opt/netbox/netbox/scripts
+    depends_on:
+      netbox-housekeeping:
+        condition: service_started
+    networks:
+      - shared-db
+      - traefik-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.netbox.rule=Host(`netbox.kensai.cloud`)"
+      - "traefik.http.routers.netbox.entrypoints=websecure"
+      - "traefik.http.routers.netbox.tls.certresolver=letsencrypt"
+      - "traefik.http.services.netbox.loadbalancer.server.port=8080"
+      - "traefik.http.routers.netbox.middlewares=security-headers@file"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+
+  netbox-worker:
+    image: netboxcommunity/netbox:${NETBOX_VERSION:-v4.4-3.4.2}
+    container_name: netbox-worker
+    restart: unless-stopped
+    command: /opt/netbox/venv/bin/python /opt/netbox/netbox/manage.py rqworker high default low
+    environment:
+      <<: *netbox-env
+    volumes:
+      - netbox-media:/opt/netbox/netbox/media
+      - netbox-reports:/opt/netbox/netbox/reports
+      - netbox-scripts:/opt/netbox/netbox/scripts
+    depends_on:
+      - netbox
+    networks:
+      - shared-db
+
+  netbox-housekeeping:
+    image: netboxcommunity/netbox:${NETBOX_VERSION:-v4.4-3.4.2}
+    container_name: netbox-housekeeping
+    restart: unless-stopped
+    command: /opt/netbox/housekeeping.sh
+    environment:
+      <<: *netbox-env
+    volumes:
+      - netbox-media:/opt/netbox/netbox/media
+      - netbox-reports:/opt/netbox/netbox/reports
+      - netbox-scripts:/opt/netbox/netbox/scripts
+    networks:
+      - shared-db
+
+volumes:
+  netbox-media:
+  netbox-reports:
+  netbox-scripts:
+
+networks:
+  shared-db:
+    external: true
+  traefik-net:
+    external: true

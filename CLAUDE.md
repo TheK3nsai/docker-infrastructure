@@ -16,12 +16,12 @@ This is a Docker-based self-hosted infrastructure using Traefik v3 as reverse pr
 ### Service Stack Order (start in this order)
 1. **traefik/** - Reverse proxy + socket-proxy (creates traefik-net and socket-proxy networks)
 2. **shared-services/** - PostgreSQL, MariaDB, Redis, Authentik (creates shared-db network)
-3. **Application stacks**: nextcloud/, uptime-kuma/, zammad/
+3. **Application stacks**: nextcloud/, uptime-kuma/, zammad/, netbox/
 
 ### Database Assignments
-- **PostgreSQL** (shared-postgres): Zammad, Authentik
+- **PostgreSQL** (shared-postgres): Zammad, Authentik, NetBox
 - **MariaDB** (shared-mariadb): Nextcloud
-- **Redis** (shared-redis): DB0=Nextcloud, DB1=Authentik, DB2=Zammad
+- **Redis** (shared-redis): DB0=Nextcloud, DB1=Authentik, DB2=Zammad, DB3=NetBox, DB4=NetBox-cache
 
 ### Authentication
 Authentik provides SSO. Services protected by Authentik use the `authentik@file` middleware defined in `traefik/dynamic.yml`.
@@ -35,6 +35,7 @@ docker compose -f shared-services/docker-compose.yml up -d
 docker compose -f nextcloud/docker-compose.yml up -d
 docker compose -f uptime-kuma/docker-compose.yml up -d
 docker compose -f zammad/docker-compose.yml up -d
+docker compose -f netbox/docker-compose.yml up -d
 
 # View logs
 docker logs -f <container-name>
@@ -52,6 +53,7 @@ docker logs traefik 2>&1 | grep -i error
 - Nextcloud: cloud.kensai.cloud
 - Uptime Kuma: uptime.kensai.cloud (protected by Authentik)
 - Zammad: tickets.kensai.cloud
+- NetBox: netbox.kensai.cloud
 
 ## Adding New Services
 

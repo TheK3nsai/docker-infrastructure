@@ -10,6 +10,7 @@ log() { echo -e "${GREEN}[INFO]${NC} $1"; }
 
 # Stop in reverse order
 log "Stopping applications..."
+docker compose -f netbox/docker-compose.yml down
 docker compose -f zammad/docker-compose.yml down
 docker compose -f uptime-kuma/docker-compose.yml down
 docker compose -f nextcloud/docker-compose.yml down
