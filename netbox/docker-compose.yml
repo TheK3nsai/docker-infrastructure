@@ -29,9 +29,6 @@ services:
       - netbox-media:/opt/netbox/netbox/media
       - netbox-reports:/opt/netbox/netbox/reports
       - netbox-scripts:/opt/netbox/netbox/scripts
-    depends_on:
-      netbox-housekeeping:
-        condition: service_started
     networks:
       - shared-db
       - traefik-net
@@ -63,20 +60,6 @@ services:
       - netbox-scripts:/opt/netbox/netbox/scripts
     depends_on:
       - netbox
-    networks:
-      - shared-db
-
-  netbox-housekeeping:
-    image: netboxcommunity/netbox:${NETBOX_VERSION:-v4.4-3.4.2}
-    container_name: netbox-housekeeping
-    restart: unless-stopped
-    command: /opt/netbox/housekeeping.sh
-    environment:
-      <<: *netbox-env
-    volumes:
-      - netbox-media:/opt/netbox/netbox/media
-      - netbox-reports:/opt/netbox/netbox/reports
-      - netbox-scripts:/opt/netbox/netbox/scripts
     networks:
       - shared-db
 
