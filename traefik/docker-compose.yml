@@ -39,10 +39,9 @@ services:
       - ./acme.json:/acme.json
       - ./logs:/var/log/traefik
     networks:
-      socket-proxy:
-      traefik-net:
-        ipv4_address: 172.19.0.2
-      shared-db:
+      - socket-proxy
+      - traefik-net
+      - shared-db
     labels:
       - "traefik.enable=true"
       # Dashboard router - protected by Authentik
