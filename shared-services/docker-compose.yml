@@ -13,7 +13,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - postgres-data-16:/var/lib/postgresql/data
       - ./init-scripts/postgres:/docker-entrypoint-initdb.d:ro
     networks:
       - shared-db
@@ -66,7 +66,7 @@ services:
   # Authentik Server
   # ============================================
   authentik-server:
-    image: ghcr.io/goauthentik/server:2025.12
+    image: ghcr.io/goauthentik/server:2025.10
     container_name: authentik-server
     restart: unless-stopped
     command: server
@@ -101,7 +101,7 @@ services:
   # Authentik Worker
   # ============================================
   authentik-worker:
-    image: ghcr.io/goauthentik/server:2025.12
+    image: ghcr.io/goauthentik/server:2025.10
     container_name: authentik-worker
     restart: unless-stopped
     command: worker
@@ -125,7 +125,7 @@ services:
       - shared-db
 
 volumes:
-  postgres-data:
+  postgres-data-16:
   mariadb-data:
   redis-data:
   authentik-media:

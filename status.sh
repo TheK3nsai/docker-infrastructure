@@ -28,7 +28,6 @@ CONTAINERS=(
     "zammad-websocket"
     "netbox"
     "netbox-worker"
-    "netbox-housekeeping"
 )
 
 check_container() {
