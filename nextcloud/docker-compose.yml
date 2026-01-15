@@ -6,6 +6,12 @@ services:
     image: nextcloud
     container_name: nextcloud
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+        reservations:
+          memory: 512m
     volumes:
       - nextcloud-data:/var/www/html
     environment:
@@ -21,6 +27,7 @@ services:
       - TRUSTED_PROXIES=172.16.0.0/12
       - OVERWRITECLIURL=https://cloud.kensai.cloud
       - OVERWRITEHOST=cloud.kensai.cloud
+      - PHP_MEMORY_LIMIT=512M
     networks:
       - shared-db
       - traefik-net
@@ -37,6 +44,12 @@ services:
     image: nextcloud
     container_name: nextcloud-cron
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+        reservations:
+          memory: 128m
     volumes:
       - nextcloud-data:/var/www/html
     entrypoint: /cron.sh

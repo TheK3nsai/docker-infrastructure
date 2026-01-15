@@ -79,6 +79,31 @@ docker logs traefik 2>&1 | grep -i error
 
 Note: Init scripts only run on first container creation. For existing installations, run SQL manually.
 
+## Memory Management
+
+All containers have memory limits configured to prevent OOM situations. The host requires a 4GB swap file for safety.
+
+| Stack | Container | Limit | Reservation |
+|-------|-----------|-------|-------------|
+| traefik | socket-proxy | 256m | 128m |
+| traefik | traefik | 512m | 256m |
+| shared-services | postgres | 512m | 256m |
+| shared-services | mariadb | 512m | 256m |
+| shared-services | redis | 256m | 128m |
+| shared-services | authentik-server | 1g | 512m |
+| shared-services | authentik-worker | 768m | 384m |
+| nextcloud | nextcloud | 1g | 512m |
+| nextcloud | nextcloud-cron | 256m | 128m |
+| uptime-kuma | uptime-kuma | 512m | 256m |
+| zammad | elasticsearch | 1200m | 768m |
+| zammad | memcached | 128m | 96m |
+| zammad | nginx | 256m | 128m |
+| zammad | railsserver | 512m | 256m |
+| zammad | scheduler | 512m | 256m |
+| zammad | websocket | 512m | 256m |
+| netbox | netbox | 768m | 384m |
+| netbox | netbox-worker | 512m | 256m |
+
 ## Configuration Files
 
 - `traefik/traefik.yml` - Static config (entrypoints, providers, TLS settings)

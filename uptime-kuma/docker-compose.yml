@@ -3,6 +3,12 @@ services:
     image: louislam/uptime-kuma:2
     container_name: uptime-kuma
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+        reservations:
+          memory: 256m
     volumes:
       - ./data:/app/data
       - /var/run/docker.sock:/var/run/docker.sock:ro

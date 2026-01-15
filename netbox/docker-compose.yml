@@ -23,6 +23,12 @@ services:
     image: netboxcommunity/netbox:${NETBOX_VERSION:-v4.4-3.4.2}
     container_name: netbox
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 768m
+        reservations:
+          memory: 384m
     environment:
       <<: *netbox-env
     volumes:
@@ -51,6 +57,12 @@ services:
     image: netboxcommunity/netbox:${NETBOX_VERSION:-v4.4-3.4.2}
     container_name: netbox-worker
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+        reservations:
+          memory: 256m
     command: /opt/netbox/venv/bin/python /opt/netbox/netbox/manage.py rqworker high default low
     environment:
       <<: *netbox-env

@@ -9,6 +9,12 @@ services:
     image: postgres:16-alpine
     container_name: shared-postgres
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+        reservations:
+          memory: 256m
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -30,6 +36,12 @@ services:
     image: mariadb:10.11
     container_name: shared-mariadb
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+        reservations:
+          memory: 256m
     command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -51,6 +63,12 @@ services:
     image: redis:7.4-alpine
     container_name: shared-redis
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+        reservations:
+          memory: 128m
     command: redis-server --save 60 1 --loglevel warning --databases 16
     volumes:
       - redis-data:/data
@@ -69,6 +87,12 @@ services:
     image: ghcr.io/goauthentik/server:2025.10
     container_name: authentik-server
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+        reservations:
+          memory: 512m
     command: server
     environment:
       AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY}
@@ -104,6 +128,12 @@ services:
     image: ghcr.io/goauthentik/server:2025.10
     container_name: authentik-worker
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 768m
+        reservations:
+          memory: 384m
     command: worker
     environment:
       AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY}
