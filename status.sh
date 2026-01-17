@@ -15,6 +15,8 @@ CONTAINERS=(
     "shared-postgres"
     "shared-mariadb"
     "shared-redis"
+    "shared-nginx"
+    "shared-apache"
     "authentik-server"
     "authentik-worker"
     "nextcloud"
@@ -28,6 +30,7 @@ CONTAINERS=(
     "zammad-websocket"
     "netbox"
     "netbox-worker"
+    "invoiceplane"
 )
 
 check_container() {
@@ -78,6 +81,7 @@ echo "  Nextcloud:  https://cloud.kensai.cloud"
 echo "  Uptime:     https://uptime.kensai.cloud"
 echo "  Zammad:     https://tickets.kensai.cloud"
 echo "  NetBox:     https://netbox.kensai.cloud"
+echo "  InvoicePlane: https://invoices.kensai.cloud"
 
 echo -e "\n${CYAN}=== Resource Usage ===${NC}\n"
 docker stats --no-stream --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}" | head -20

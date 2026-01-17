@@ -12,6 +12,7 @@ Self-hosted Docker infrastructure with Traefik reverse proxy, shared databases, 
 | Uptime Kuma | uptime.kensai.cloud | Monitoring dashboard |
 | Zammad | tickets.kensai.cloud | Helpdesk / ticketing system |
 | NetBox | netbox.kensai.cloud | IPAM / DCIM infrastructure management |
+| InvoicePlane | invoices.kensai.cloud | Open source invoicing |
 
 ## Architecture
 
@@ -25,19 +26,19 @@ Self-hosted Docker infrastructure with Traefik reverse proxy, shared databases, 
                          │         (reverse proxy)                  │
                          └───────────────────┬─────────────────────┘
                                              │ traefik-net
-      ┌──────────────┬───────────────┬───────┴───────┬───────────────┬──────────────┐
-      ▼              ▼               ▼               ▼               ▼              ▼
-┌──────────┐  ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐
-│ Authentik│  │ Nextcloud│   │  Zammad  │   │  Uptime  │   │  NetBox  │   │  Future  │
-│   SSO    │  │          │   │          │   │   Kuma   │   │IPAM/DCIM │   │  Apps    │
-└────┬─────┘  └────┬─────┘   └────┬─────┘   └──────────┘   └────┬─────┘   └────┬─────┘
-     │             │              │                              │              │
-     └─────────────┴──────────────┴──────────────────────────────┴──────────────┘
+      ┌──────────────┬───────────────┬───────┴───────┬───────────────┬──────────────┬──────────────┐
+      ▼              ▼               ▼               ▼               ▼              ▼              ▼
+┌──────────┐  ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐
+│ Authentik│  │ Nextcloud│   │  Zammad  │   │  Uptime  │   │  NetBox  │   │ Invoice  │   │  Future  │
+│   SSO    │  │          │   │          │   │   Kuma   │   │IPAM/DCIM │   │  Plane   │   │  Apps    │
+└────┬─────┘  └────┬─────┘   └────┬─────┘   └──────────┘   └────┬─────┘   └────┬─────┘   └────┬─────┘
+     │             │              │                              │              │              │
+     └─────────────┴──────────────┴──────────────────────────────┴──────────────┴──────────────┘
                                   │ shared-db
                     ┌─────────────┴─────────────────┐
-                    │         Shared Services           │
-                    │  PostgreSQL │ MariaDB │ Redis     │
-                    └───────────────────────────────────┘
+                    │           Shared Services              │
+                    │  PostgreSQL │ MariaDB │ Redis │ Nginx  │
+                    └────────────────────────────────────────┘
 ```
 
 ## Prerequisites
@@ -56,6 +57,7 @@ cp shared-services/.env.example shared-services/.env
 cp nextcloud/.env.example nextcloud/.env
 cp zammad/.env.example zammad/.env
 cp netbox/.env.example netbox/.env
+cp invoiceplane/.env.example invoiceplane/.env
 ```
 
 ### 2. Set up Traefik certificates file
@@ -82,6 +84,7 @@ docker compose -f nextcloud/docker-compose.yml up -d
 docker compose -f uptime-kuma/docker-compose.yml up -d
 docker compose -f zammad/docker-compose.yml up -d
 docker compose -f netbox/docker-compose.yml up -d
+docker compose -f invoiceplane/docker-compose.yml up -d
 ```
 
 ### 4. Initial Authentik setup
@@ -99,12 +102,18 @@ docker/
 │   ├── traefik.yml          # Static configuration
 │   ├── dynamic.yml          # Dynamic configuration (middlewares)
 │   └── acme.json            # Let's Encrypt certificates
-├── shared-services/         # Databases and Authentik
+├── shared-services/         # Databases, Authentik, shared nginx & apache
 │   ├── docker-compose.yml
 │   ├── .env
-│   └── init-scripts/        # Database initialization
-│       ├── postgres/
-│       └── mariadb/
+│   ├── init-scripts/        # Database initialization
+│   │   ├── postgres/
+│   │   └── mariadb/
+│   ├── nginx/               # Shared nginx configuration
+│   │   ├── nginx.conf
+│   │   └── conf.d/          # Virtual hosts (zammad.conf)
+│   └── apache/              # Shared apache configuration
+│       ├── httpd.conf
+│       └── sites-enabled/   # Virtual hosts (invoiceplane.conf)
 ├── nextcloud/
 │   ├── docker-compose.yml
 │   └── .env
@@ -113,8 +122,12 @@ docker/
 ├── zammad/
 │   ├── docker-compose.yml
 │   └── .env
-└── netbox/
+├── netbox/
+│   ├── docker-compose.yml
+│   └── .env
+└── invoiceplane/
     ├── docker-compose.yml
+    ├── Dockerfile           # Custom PHP-FPM with required extensions
     └── .env
 ```
 
@@ -134,6 +147,7 @@ docker/
 | zammad | PostgreSQL | Zammad |
 | netbox | PostgreSQL | NetBox |
 | nextcloud | MariaDB | Nextcloud |
+| invoiceplane | MariaDB | InvoicePlane |
 
 Redis databases: 0=Nextcloud, 1=Authentik, 2=Zammad, 3=NetBox, 4=NetBox-cache
 
@@ -145,6 +159,7 @@ docker logs -f traefik
 docker logs -f authentik-server
 docker logs -f nextcloud
 docker logs -f netbox
+docker logs -f invoiceplane
 ```
 
 ### Restart a stack

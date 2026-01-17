@@ -15,12 +15,12 @@ This is a Docker-based self-hosted infrastructure using Traefik v3 as reverse pr
 
 ### Service Stack Order (start in this order)
 1. **traefik/** - Reverse proxy + socket-proxy (creates traefik-net and socket-proxy networks)
-2. **shared-services/** - PostgreSQL, MariaDB, Redis, Authentik (creates shared-db network)
-3. **Application stacks**: nextcloud/, uptime-kuma/, zammad/, netbox/
+2. **shared-services/** - PostgreSQL, MariaDB, Redis, Authentik, shared-nginx, shared-apache (creates shared-db network)
+3. **Application stacks**: nextcloud/, uptime-kuma/, zammad/, netbox/, invoiceplane/
 
 ### Database Assignments
 - **PostgreSQL** (shared-postgres): Zammad, Authentik, NetBox
-- **MariaDB** (shared-mariadb): Nextcloud
+- **MariaDB** (shared-mariadb): Nextcloud, InvoicePlane
 - **Redis** (shared-redis): DB0=Nextcloud, DB1=Authentik, DB2=Zammad, DB3=NetBox, DB4=NetBox-cache
 
 ### Authentication
@@ -36,6 +36,7 @@ docker compose -f nextcloud/docker-compose.yml up -d
 docker compose -f uptime-kuma/docker-compose.yml up -d
 docker compose -f zammad/docker-compose.yml up -d
 docker compose -f netbox/docker-compose.yml up -d
+docker compose -f invoiceplane/docker-compose.yml up -d
 
 # View logs
 docker logs -f <container-name>
@@ -54,6 +55,7 @@ docker logs traefik 2>&1 | grep -i error
 - Uptime Kuma: uptime.kensai.cloud (protected by Authentik)
 - Zammad: tickets.kensai.cloud
 - NetBox: netbox.kensai.cloud
+- InvoicePlane: invoices.kensai.cloud (protected by Authentik)
 
 ## Adding New Services
 
@@ -92,21 +94,59 @@ All containers have memory limits configured to prevent OOM situations. The host
 | shared-services | redis | 256m | 128m |
 | shared-services | authentik-server | 1g | 512m |
 | shared-services | authentik-worker | 768m | 384m |
+| shared-services | nginx | 256m | 128m |
+| shared-services | apache | 256m | 128m |
 | nextcloud | nextcloud | 1g | 512m |
 | nextcloud | nextcloud-cron | 256m | 128m |
 | uptime-kuma | uptime-kuma | 512m | 256m |
 | zammad | elasticsearch | 1200m | 768m |
 | zammad | memcached | 128m | 96m |
-| zammad | nginx | 256m | 128m |
 | zammad | railsserver | 512m | 256m |
 | zammad | scheduler | 512m | 256m |
 | zammad | websocket | 512m | 256m |
 | netbox | netbox | 768m | 384m |
 | netbox | netbox-worker | 512m | 256m |
+| invoiceplane | invoiceplane | 384m | 192m |
+
+## Shared Web Servers
+
+### Shared Nginx
+The shared-nginx container in shared-services is available for future Rails/static applications.
+
+Configuration files are in `shared-services/nginx/`:
+- `nginx.conf` - Main nginx configuration
+- `conf.d/` - Virtual host configurations
+
+To add a new app to shared-nginx, create a new `.conf` file in `conf.d/` and reload: `docker exec shared-nginx nginx -s reload`
+
+### Shared Apache
+The shared-apache container in shared-services proxies requests for PHP-FPM applications:
+- **InvoicePlane** (invoices.kensai.cloud) - Serves static files, proxies PHP to invoiceplane:9000
+
+Configuration files are in `shared-services/apache/`:
+- `httpd.conf` - Main Apache configuration (based on default with proxy modules enabled)
+- `sites-enabled/invoiceplane.conf` - InvoicePlane virtual host
+
+InvoicePlane uses an init container pattern to download code and share it between PHP-FPM and Apache via the `invoiceplane-code` volume.
+
+To add a new app to shared-apache, create a new `.conf` file in `sites-enabled/` and reload: `docker exec shared-apache httpd -k graceful`
+
+## Zammad Architecture
+
+Zammad uses direct Traefik routing (bypassing internal nginx) to avoid CSRF issues with `X-Forwarded-Proto`:
+- **Main app**: Traefik → zammad-railsserver:3000
+- **WebSockets**: Traefik → zammad-websocket:6042 (path `/ws`)
+
+Required database settings (set automatically):
+- `http_type`: https
+- `fqdn`: tickets.kensai.cloud
 
 ## Configuration Files
 
 - `traefik/traefik.yml` - Static config (entrypoints, providers, TLS settings)
 - `traefik/dynamic.yml` - Dynamic config (middlewares, watched for changes)
 - `traefik/acme.json` - Let's Encrypt certificates (auto-managed)
+- `shared-services/nginx/` - Shared nginx configuration
+- `shared-services/apache/` - Shared apache configuration
+- `invoiceplane/ipconfig.php` - InvoicePlane configuration (stored in volume)
 - `.env` files in each stack directory contain secrets

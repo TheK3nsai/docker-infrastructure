@@ -49,6 +49,7 @@ docker compose -f nextcloud/docker-compose.yml up -d
 docker compose -f uptime-kuma/docker-compose.yml up -d
 docker compose -f zammad/docker-compose.yml up -d
 docker compose -f netbox/docker-compose.yml up -d
+docker compose -f invoiceplane/docker-compose.yml up -d
 
 log "All services started"
 docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | head -20

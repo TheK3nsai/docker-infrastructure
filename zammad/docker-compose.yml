@@ -1,4 +1,4 @@
-# Zammad Docker Compose - Using Shared PostgreSQL + Redis
+# Zammad Docker Compose - Using Shared PostgreSQL + Redis + Nginx
 # ~/docker/zammad/docker-compose.yml
 
 x-zammad-service: &zammad-service
@@ -13,6 +13,8 @@ x-zammad-service: &zammad-service
     REDIS_URL: redis://shared-redis:6379/2
     ELASTICSEARCH_HOST: zammad-elasticsearch
     ELASTICSEARCH_PORT: 9200
+    ZAMMAD_HTTP_TYPE: https
+    ZAMMAD_FQDN: tickets.kensai.cloud
   volumes:
     - zammad-storage:/opt/zammad/storage
   depends_on:
@@ -71,35 +73,6 @@ services:
       - zammad-elasticsearch
       - zammad-memcached
 
-  zammad-nginx:
-    <<: *zammad-service
-    container_name: zammad-nginx
-    command: ["zammad-nginx"]
-    deploy:
-      resources:
-        limits:
-          memory: 256m
-        reservations:
-          memory: 128m
-    environment:
-      <<: *zammad-environment
-      NGINX_SERVER_NAME: ${NGINX_SERVER_NAME:-tickets.kensai.cloud}
-      NGINX_SERVER_SCHEME: ${NGINX_SERVER_SCHEME:-https}
-      RAILS_TRUSTED_PROXIES: ${RAILS_TRUSTED_PROXIES:-172.16.0.0/12}
-    depends_on:
-      - zammad-railsserver
-    networks:
-      - zammad-internal
-      - shared-db
-      - traefik-net
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.zammad.rule=Host(`${NGINX_SERVER_NAME:-tickets.kensai.cloud}`)"
-      - "traefik.http.routers.zammad.entrypoints=websecure"
-      - "traefik.http.routers.zammad.tls.certresolver=letsencrypt"
-      - "traefik.http.services.zammad.loadbalancer.server.port=8080"
-      - "traefik.http.routers.zammad.middlewares=security-headers@file"
-
   zammad-railsserver:
     <<: *zammad-service
     container_name: zammad-railsserver
@@ -112,6 +85,18 @@ services:
           memory: 256m
     depends_on:
       - zammad-init
+    networks:
+      - zammad-internal
+      - shared-db
+      - traefik-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-net"
+      - "traefik.http.routers.zammad.rule=Host(`tickets.kensai.cloud`)"
+      - "traefik.http.routers.zammad.entrypoints=websecure"
+      - "traefik.http.routers.zammad.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.zammad.middlewares=security-headers@file"
+      - "traefik.http.services.zammad.loadbalancer.server.port=3000"
 
   zammad-scheduler:
     <<: *zammad-service
@@ -138,6 +123,35 @@ services:
           memory: 256m
     depends_on:
       - zammad-init
+    networks:
+      - zammad-internal
+      - shared-db
+      - traefik-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-net"
+      - "traefik.http.routers.zammad-ws.rule=Host(`tickets.kensai.cloud`) && Path(`/ws`)"
+      - "traefik.http.routers.zammad-ws.entrypoints=websecure"
+      - "traefik.http.routers.zammad-ws.tls.certresolver=letsencrypt"
+      - "traefik.http.services.zammad-ws.loadbalancer.server.port=6042"
+
+  # zammad-nginx disabled - Traefik connects directly to railsserver/websocket
+  # zammad-nginx:
+  #   <<: *zammad-service
+  #   container_name: zammad-nginx
+  #   command: ["zammad-nginx"]
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         memory: 256m
+  #       reservations:
+  #         memory: 128m
+  #   expose:
+  #     - "8080"
+  #   depends_on:
+  #     - zammad-railsserver
+  #   networks:
+  #     - zammad-internal
 
 volumes:
   zammad-es:

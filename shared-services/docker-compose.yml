@@ -154,12 +154,72 @@ services:
     networks:
       - shared-db
 
+  # ============================================
+  # Shared Nginx - Available for future Rails/static apps
+  # ============================================
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: shared-nginx
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+        reservations:
+          memory: 128m
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+    networks:
+      - shared-db
+      - traefik-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-net"
+      # Shared service (no routes currently - available for future apps)
+      - "traefik.http.services.shared-nginx.loadbalancer.server.port=80"
+
+  # ============================================
+  # Shared Apache - Reverse proxy for PHP-FPM apps
+  # ============================================
+  apache:
+    image: httpd:2.4-alpine
+    container_name: shared-apache
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+        reservations:
+          memory: 128m
+    volumes:
+      - ./apache/httpd.conf:/usr/local/apache2/conf/httpd.conf:ro
+      - ./apache/sites-enabled:/usr/local/apache2/conf/sites-enabled:ro
+      - invoiceplane-code:/var/www/invoiceplane:ro
+    networks:
+      - shared-db
+      - traefik-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-net"
+      # InvoicePlane routing
+      - "traefik.http.routers.invoiceplane.rule=Host(`invoices.kensai.cloud`)"
+      - "traefik.http.routers.invoiceplane.entrypoints=websecure"
+      - "traefik.http.routers.invoiceplane.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.invoiceplane.middlewares=authentik@file,security-headers@file"
+      - "traefik.http.routers.invoiceplane.service=shared-apache"
+      # Shared service
+      - "traefik.http.services.shared-apache.loadbalancer.server.port=80"
+
 volumes:
   postgres-data-16:
   mariadb-data:
   redis-data:
   authentik-media:
   authentik-templates:
+  invoiceplane-code:
+    external: true
+    name: invoiceplane_invoiceplane-code
 
 networks:
   shared-db:
