@@ -24,7 +24,6 @@ CONTAINERS=(
     "uptime-kuma"
     "zammad-elasticsearch"
     "zammad-memcached"
-    "zammad-nginx"
     "zammad-railsserver"
     "zammad-scheduler"
     "zammad-websocket"

@@ -141,6 +141,12 @@ Required database settings (set automatically):
 - `http_type`: https
 - `fqdn`: tickets.kensai.cloud
 
+## Helper Scripts
+
+- `./start.sh` - Start all services in correct order with health checks
+- `./stop.sh` - Stop all services in reverse order
+- `./status.sh` - Show container status, health, and resource usage
+
 ## Configuration Files
 
 - `traefik/traefik.yml` - Static config (entrypoints, providers, TLS settings)
@@ -148,5 +154,25 @@ Required database settings (set automatically):
 - `traefik/acme.json` - Let's Encrypt certificates (auto-managed)
 - `shared-services/nginx/` - Shared nginx configuration
 - `shared-services/apache/` - Shared apache configuration
-- `invoiceplane/ipconfig.php` - InvoicePlane configuration (stored in volume)
+- `shared-services/init-scripts/` - Database initialization SQL scripts
 - `.env` files in each stack directory contain secrets
+
+## Troubleshooting
+
+### Zammad CSRF Token Errors
+Zammad requires `http_type=https` and `fqdn=tickets.kensai.cloud` in the database. These are set via environment variables `ZAMMAD_HTTP_TYPE` and `ZAMMAD_FQDN`. Direct Traefik routing bypasses internal nginx to avoid header issues.
+
+### InvoicePlane Setup Loop
+InvoicePlane checks `SETUP_COMPLETED=true` in `ipconfig.php` (not in database). Ensure this is set after completing setup wizard.
+
+### Container Health Issues
+```bash
+# Check specific container logs
+docker logs <container-name> --tail 100
+
+# Check all container status
+./status.sh
+
+# Restart a specific stack
+docker compose -f <stack>/docker-compose.yml restart
+```

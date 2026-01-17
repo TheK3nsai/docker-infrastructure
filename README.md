@@ -47,6 +47,14 @@ Self-hosted Docker infrastructure with Traefik reverse proxy, shared databases, 
 - Domain with DNS pointing to your server
 - Ports 80 and 443 available
 
+## Helper Scripts
+
+```bash
+./start.sh   # Start all services in correct order with health checks
+./stop.sh    # Stop all services in reverse order
+./status.sh  # Show container status, health, and resource usage
+```
+
 ## Quick Start
 
 ### 1. Clone and configure environment files
@@ -110,7 +118,7 @@ docker/
 │   │   └── mariadb/
 │   ├── nginx/               # Shared nginx configuration
 │   │   ├── nginx.conf
-│   │   └── conf.d/          # Virtual hosts (zammad.conf)
+│   │   └── conf.d/          # Virtual host configurations
 │   └── apache/              # Shared apache configuration
 │       ├── httpd.conf
 │       └── sites-enabled/   # Virtual hosts (invoiceplane.conf)
@@ -221,3 +229,9 @@ docker exec shared-mariadb mysqldump -u root -p --all-databases > backup.sql
 - Check `acme.json` permissions: `chmod 600 traefik/acme.json`
 - Verify DNS is pointing to server
 - Check Traefik logs for ACME errors
+
+### Zammad CSRF token errors
+Zammad uses direct Traefik routing to railsserver:3000 (bypassing internal nginx) to avoid `X-Forwarded-Proto` header issues. Environment variables `ZAMMAD_HTTP_TYPE=https` and `ZAMMAD_FQDN` must be set.
+
+### InvoicePlane keeps showing setup
+InvoicePlane checks `SETUP_COMPLETED=true` in `ipconfig.php` (stored in Docker volume). Ensure this is set after completing the setup wizard.
