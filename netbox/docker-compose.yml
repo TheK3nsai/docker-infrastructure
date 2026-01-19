@@ -20,7 +20,7 @@ x-netbox-env: &netbox-env
 
 services:
   netbox:
-    image: netboxcommunity/netbox:${NETBOX_VERSION:-v4.4-3.4.2}
+    image: netboxcommunity/netbox:${NETBOX_VERSION:-v4.5-3.4.2}
     container_name: netbox
     restart: unless-stopped
     deploy:
@@ -54,7 +54,7 @@ services:
       start_period: 120s
 
   netbox-worker:
-    image: netboxcommunity/netbox:${NETBOX_VERSION:-v4.4-3.4.2}
+    image: netboxcommunity/netbox:${NETBOX_VERSION:-v4.5-3.4.2}
     container_name: netbox-worker
     restart: unless-stopped
     deploy:
