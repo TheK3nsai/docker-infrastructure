@@ -45,7 +45,7 @@ services:
       - "traefik.http.routers.netbox.entrypoints=websecure"
       - "traefik.http.routers.netbox.tls.certresolver=letsencrypt"
       - "traefik.http.services.netbox.loadbalancer.server.port=8080"
-      - "traefik.http.routers.netbox.middlewares=security-headers@file"
+      - "traefik.http.routers.netbox.middlewares=authentik@file,security-headers@file"
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://localhost:8080/login/"]
       interval: 30s

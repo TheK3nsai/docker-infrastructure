@@ -54,7 +54,7 @@ docker logs traefik 2>&1 | grep -i error
 - Nextcloud: cloud.kensai.cloud
 - Uptime Kuma: uptime.kensai.cloud (protected by Authentik)
 - Zammad: tickets.kensai.cloud
-- NetBox: netbox.kensai.cloud
+- NetBox: netbox.kensai.cloud (protected by Authentik)
 - InvoicePlane: invoices.kensai.cloud (protected by Authentik)
 
 ## Adding New Services
