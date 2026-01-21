@@ -1,0 +1,49 @@
+# Collabora Online - Office document editing for Nextcloud
+# ~/docker/collabora/docker-compose.yml
+
+services:
+  collabora:
+    image: collabora/code:latest
+    container_name: collabora
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1536m
+        reservations:
+          memory: 1g
+    environment:
+      # Domain allowed to access Collabora
+      - aliasgroup1=https://cloud.kensai.cloud:443
+      # Server name for Collabora
+      - server_name=office.kensai.cloud
+      # Disable SSL (Traefik handles it)
+      - extra_params=--o:ssl.enable=false --o:ssl.termination=true --o:net.proto=IPv4
+      - DONT_GEN_SSL_CERT=1
+    cap_add:
+      - SYS_ADMIN
+      - MKNOD
+    security_opt:
+      - seccomp:unconfined
+    tmpfs:
+      - /tmp:exec,size=512M
+    networks:
+      - traefik-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-net"
+      # Main router for Collabora
+      - "traefik.http.routers.collabora.rule=Host(`office.kensai.cloud`)"
+      - "traefik.http.routers.collabora.entrypoints=websecure"
+      - "traefik.http.routers.collabora.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.collabora.middlewares=collabora-headers@file,collabora-websocket@file"
+      # Service configuration with WebSocket support
+      - "traefik.http.services.collabora.loadbalancer.server.port=9980"
+      - "traefik.http.services.collabora.loadbalancer.server.scheme=http"
+      - "traefik.http.services.collabora.loadbalancer.passhostheader=true"
+      - "traefik.http.services.collabora.loadbalancer.responseforwarding.flushinterval=-1"
+      - "traefik.http.services.collabora.loadbalancer.serverstransport=collabora-transport@file"
+
+networks:
+  traefik-net:
+    external: true

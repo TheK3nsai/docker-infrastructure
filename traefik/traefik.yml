@@ -24,6 +24,7 @@ entryPoints:
     http:
       tls:
         options: default
+      # Note: v3.6.0 allows encoded characters by default (blocking added in v3.6.4)
 
 tls:
   options:

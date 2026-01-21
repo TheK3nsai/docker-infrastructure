@@ -1,4 +1,12 @@
 http:
+  serversTransports:
+    collabora-transport:
+      # Disable HTTP/2 to backend for WebSocket compatibility
+      forwardingTimeouts:
+        dialTimeout: "30s"
+        responseHeaderTimeout: "0s"
+        idleConnTimeout: "90s"
+
   middlewares:
     security-headers:
       headers:
@@ -13,6 +21,23 @@ http:
 
         customResponseHeaders:
           X-Robots-Tag: "noindex, nofollow"
+
+    collabora-headers:
+      headers:
+        contentTypeNosniff: true
+        referrerPolicy: "strict-origin-when-cross-origin"
+        stsSeconds: 31536000
+        stsIncludeSubdomains: true
+        stsPreload: true
+        customResponseHeaders:
+          X-Robots-Tag: "noindex, nofollow"
+        contentSecurityPolicy: "frame-ancestors 'self' https://cloud.kensai.cloud"
+
+    # WebSocket support for Collabora - passes through upgrade headers
+    collabora-websocket:
+      headers:
+        customRequestHeaders:
+          X-Forwarded-Proto: "https"
 
     authentik:
       forwardAuth:

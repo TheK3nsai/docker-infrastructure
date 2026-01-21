@@ -16,7 +16,7 @@ This is a Docker-based self-hosted infrastructure using Traefik v3 as reverse pr
 ### Service Stack Order (start in this order)
 1. **traefik/** - Reverse proxy + socket-proxy (creates traefik-net and socket-proxy networks)
 2. **shared-services/** - PostgreSQL, MariaDB, Redis, Authentik, shared-nginx, shared-apache (creates shared-db network)
-3. **Application stacks**: nextcloud/, uptime-kuma/, zammad/, netbox/, invoiceplane/
+3. **Application stacks**: nextcloud/, uptime-kuma/, zammad/, netbox/, invoiceplane/, collabora/
 
 ### Database Assignments
 - **PostgreSQL** (shared-postgres): Zammad, Authentik, NetBox
@@ -37,6 +37,7 @@ docker compose -f uptime-kuma/docker-compose.yml up -d
 docker compose -f zammad/docker-compose.yml up -d
 docker compose -f netbox/docker-compose.yml up -d
 docker compose -f invoiceplane/docker-compose.yml up -d
+docker compose -f collabora/docker-compose.yml up -d
 
 # View logs
 docker logs -f <container-name>
@@ -56,6 +57,7 @@ docker logs traefik 2>&1 | grep -i error
 - Zammad: tickets.kensai.cloud
 - NetBox: netbox.kensai.cloud (protected by Authentik)
 - InvoicePlane: invoices.kensai.cloud (protected by Authentik)
+- Collabora: office.kensai.cloud (document editing for Nextcloud)
 
 ## Adding New Services
 
@@ -107,6 +109,7 @@ All containers have memory limits configured to prevent OOM situations. The host
 | netbox | netbox | 768m | 384m |
 | netbox | netbox-worker | 512m | 256m |
 | invoiceplane | invoiceplane | 384m | 192m |
+| collabora | collabora | 1536m | 1g |
 
 ## Shared Web Servers
 
@@ -140,6 +143,40 @@ Zammad uses direct Traefik routing (bypassing internal nginx) to avoid CSRF issu
 Required database settings (set automatically):
 - `http_type`: https
 - `fqdn`: tickets.kensai.cloud
+
+## Traefik Version Pinning
+
+Traefik is pinned to **v3.6.2** due to a bug in v3.6.4+ that breaks URL-encoded character handling (GitHub issue #12437). Collabora WOPI URLs contain encoded paths that require this to work correctly. Do not upgrade past v3.6.2 until the bug is fixed upstream.
+
+## Collabora Online Integration
+
+Collabora Online provides office document editing (DOCX, ODT, XLSX, PPTX, etc.) for Nextcloud.
+
+### Configuration
+The richdocuments app in Nextcloud is configured to use the external Collabora server:
+- WOPI URL: `https://office.kensai.cloud`
+- Collabora is configured to accept requests only from `cloud.kensai.cloud`
+- WOPI allow list in Nextcloud: `127.0.0.1,::1,172.19.0.0/24`
+
+### Container Requirements
+Collabora requires special capabilities for optimal performance:
+```yaml
+cap_add:
+  - SYS_ADMIN   # Required for bind mounts in jail namespaces
+  - MKNOD
+security_opt:
+  - seccomp:unconfined  # Allow mount syscalls
+tmpfs:
+  - /tmp:exec,size=512M  # Fast tmpfs for temp files
+```
+
+Without `SYS_ADMIN`, Collabora falls back to slow file copying instead of bind mounts for jail setup.
+
+### Traefik Configuration
+Collabora uses multiple middlewares and a custom serversTransport in `traefik/dynamic.yml`:
+- `collabora-headers@file`: Security headers with CSP frame-ancestors for Nextcloud embedding
+- `collabora-websocket@file`: Adds X-Forwarded-Proto header
+- `collabora-transport@file`: Custom timeouts for WebSocket connections (responseHeaderTimeout: 0s)
 
 ## Helper Scripts
 
