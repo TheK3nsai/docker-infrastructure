@@ -43,7 +43,11 @@ wait_healthy shared-postgres 90
 wait_healthy shared-mariadb 90
 wait_healthy shared-redis 60
 
-# 3. Applications (parallel)
+# 3. Monitoring stack
+log "Starting monitoring stack..."
+docker compose -f monitoring/docker-compose.yml up -d
+
+# 4. Applications (parallel)
 log "Starting applications..."
 docker compose -f nextcloud/docker-compose.yml up -d
 docker compose -f uptime-kuma/docker-compose.yml up -d

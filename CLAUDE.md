@@ -16,7 +16,8 @@ This is a Docker-based self-hosted infrastructure using Traefik v3 as reverse pr
 ### Service Stack Order (start in this order)
 1. **traefik/** - Reverse proxy + socket-proxy (creates traefik-net and socket-proxy networks)
 2. **shared-services/** - PostgreSQL, MariaDB, Redis, Authentik, shared-nginx, shared-apache (creates shared-db network)
-3. **Application stacks**: nextcloud/, uptime-kuma/, zammad/, netbox/, invoiceplane/, collabora/, forgejo/
+3. **monitoring/** - Prometheus, Grafana, Node Exporter, cAdvisor (creates monitoring network)
+4. **Application stacks**: nextcloud/, uptime-kuma/, zammad/, netbox/, invoiceplane/, collabora/, forgejo/
 
 ### Database Assignments
 - **PostgreSQL** (shared-postgres): Zammad, Authentik, NetBox, Forgejo
@@ -34,6 +35,7 @@ Authentik provides SSO via two methods:
 # Start infrastructure (run in order)
 docker compose -f traefik/docker-compose.yml up -d
 docker compose -f shared-services/docker-compose.yml up -d
+docker compose -f monitoring/docker-compose.yml up -d
 docker compose -f nextcloud/docker-compose.yml up -d
 docker compose -f uptime-kuma/docker-compose.yml up -d
 docker compose -f zammad/docker-compose.yml up -d
@@ -55,6 +57,8 @@ docker logs traefik 2>&1 | grep -i error
 ## Service URLs
 - Traefik Dashboard: traefik.kensai.cloud (protected by Authentik)
 - Authentik: auth.kensai.cloud
+- Prometheus: prometheus.kensai.cloud (protected by Authentik)
+- Grafana: grafana.kensai.cloud (protected by Authentik)
 - Nextcloud: cloud.kensai.cloud
 - Uptime Kuma: uptime.kensai.cloud (protected by Authentik)
 - Zammad: tickets.kensai.cloud
@@ -115,6 +119,10 @@ All containers have memory limits configured to prevent OOM situations. The host
 | invoiceplane | invoiceplane | 384m | 192m |
 | collabora | collabora | 1536m | 1g |
 | forgejo | forgejo | 512m | 256m |
+| monitoring | prometheus | 512m | 256m |
+| monitoring | grafana | 512m | 256m |
+| monitoring | node-exporter | 128m | 64m |
+| monitoring | cadvisor | 256m | 128m |
 
 ## Shared Web Servers
 
@@ -221,6 +229,69 @@ In Authentik, configure an **OAuth2/OpenID Provider** (not Proxy Provider) with:
 - Authentication happens through Forgejo's login page, not Authentik's proxy
 - Users can still access public repositories without authentication
 
+## Monitoring Stack
+
+The monitoring stack provides infrastructure and container metrics collection and visualization.
+
+### Components
+- **Prometheus** (prometheus.kensai.cloud): Time-series metrics database and alerting
+- **Grafana** (grafana.kensai.cloud): Metrics visualization and dashboards
+- **Node Exporter**: Host system metrics (CPU, memory, disk, network)
+- **cAdvisor**: Container metrics (per-container CPU, memory, network, I/O)
+
+### Network Architecture
+- Prometheus, Grafana connect to both `traefik-net` (for web access) and `monitoring` network
+- Node Exporter and cAdvisor only connect to `monitoring` network (internal only)
+- Node Exporter uses `pid: host` for accurate process metrics
+
+### Grafana Authentication
+Grafana uses Authentik's forward auth headers for automatic SSO login:
+```yaml
+# Auth proxy configuration
+GF_AUTH_PROXY_ENABLED=true
+GF_AUTH_PROXY_HEADER_NAME=X-authentik-username
+GF_AUTH_PROXY_HEADER_PROPERTY=username
+GF_AUTH_PROXY_AUTO_SIGN_UP=true
+GF_AUTH_PROXY_HEADERS=Email:X-authentik-email Name:X-authentik-name
+GF_AUTH_PROXY_WHITELIST=172.19.0.0/24
+
+# Disable native login (Authentik handles auth)
+GF_AUTH_DISABLE_LOGIN_FORM=true
+GF_AUTH_DISABLE_SIGNOUT_MENU=true
+```
+
+Users authenticated through Authentik are automatically logged into Grafana without seeing a login page.
+
+### Pre-installed Dashboards
+- **Node Exporter Full** (ID 1860): Comprehensive host system metrics
+- **Docker/cAdvisor** (ID 14282): Container resource usage metrics
+
+### Prometheus Scrape Targets
+Configured in `monitoring/prometheus.yml`:
+- `prometheus` (localhost:9090): Prometheus self-monitoring
+- `node-exporter` (node-exporter:9100): Host metrics
+- `cadvisor` (cadvisor:8080): Container metrics
+
+### Enabling Traefik Metrics
+To add Traefik metrics to Prometheus, add to `traefik/traefik.yml`:
+```yaml
+metrics:
+  prometheus:
+    addEntryPointsLabels: true
+    addServicesLabels: true
+    addRoutersLabels: true
+```
+
+Then uncomment the traefik job in `monitoring/prometheus.yml`.
+
+### Configuration Files
+- `monitoring/docker-compose.yml` - All monitoring services
+- `monitoring/prometheus.yml` - Prometheus scrape configuration
+- `monitoring/grafana/provisioning/datasources/` - Auto-provisioned datasources
+- `monitoring/grafana/provisioning/dashboards/` - Dashboard provisioning config
+- `monitoring/grafana/dashboards/` - Dashboard JSON files
+- `monitoring/.env` - Grafana admin password
+
 ## Helper Scripts
 
 - `./start.sh` - Start all services in correct order with health checks
@@ -235,6 +306,9 @@ In Authentik, configure an **OAuth2/OpenID Provider** (not Proxy Provider) with:
 - `shared-services/nginx/` - Shared nginx configuration
 - `shared-services/apache/` - Shared apache configuration
 - `shared-services/init-scripts/` - Database initialization SQL scripts
+- `monitoring/prometheus.yml` - Prometheus scrape configuration
+- `monitoring/grafana/provisioning/` - Grafana auto-provisioning configs
+- `monitoring/grafana/dashboards/` - Pre-installed Grafana dashboards
 - `.env` files in each stack directory contain secrets
 
 ## Troubleshooting

@@ -18,6 +18,9 @@ docker compose -f zammad/docker-compose.yml down
 docker compose -f uptime-kuma/docker-compose.yml down
 docker compose -f nextcloud/docker-compose.yml down
 
+log "Stopping monitoring stack..."
+docker compose -f monitoring/docker-compose.yml down
+
 log "Stopping shared services..."
 docker compose -f shared-services/docker-compose.yml down
 
