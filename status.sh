@@ -31,6 +31,7 @@ CONTAINERS=(
     "netbox-worker"
     "invoiceplane"
     "collabora"
+    "forgejo"
 )
 
 check_container() {
@@ -83,6 +84,7 @@ echo "  Zammad:       https://tickets.kensai.cloud"
 echo "  NetBox:       https://netbox.kensai.cloud"
 echo "  InvoicePlane: https://invoices.kensai.cloud"
 echo "  Collabora:    https://office.kensai.cloud"
+echo "  Forgejo:      https://git.kensai.cloud"
 
 echo -e "\n${CYAN}=== Resource Usage ===${NC}\n"
 docker stats --no-stream --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}" | head -20

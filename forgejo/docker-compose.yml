@@ -1,0 +1,86 @@
+# Forgejo Docker Compose - Self-hosted Git forge
+# ~/docker/forgejo/docker-compose.yml
+
+services:
+  forgejo:
+    image: codeberg.org/forgejo/forgejo:${FORGEJO_VERSION:-10}
+    container_name: forgejo
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+        reservations:
+          memory: 256m
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+      # Database configuration (PostgreSQL via shared-services)
+      - FORGEJO__database__DB_TYPE=postgres
+      - FORGEJO__database__HOST=shared-postgres:5432
+      - FORGEJO__database__NAME=${FORGEJO_DB:-forgejo}
+      - FORGEJO__database__USER=${FORGEJO_DB_USER:-forgejo}
+      - FORGEJO__database__PASSWD=${FORGEJO_DB_PASSWORD}
+      # Redis cache configuration (DB5)
+      - FORGEJO__cache__ENABLED=true
+      - FORGEJO__cache__ADAPTER=redis
+      - FORGEJO__cache__HOST=redis://shared-redis:6379/5
+      # Session storage
+      - FORGEJO__session__PROVIDER=redis
+      - FORGEJO__session__PROVIDER_CONFIG=redis://shared-redis:6379/5
+      # Queue configuration
+      - FORGEJO__queue__TYPE=redis
+      - FORGEJO__queue__CONN_STR=redis://shared-redis:6379/5
+      # Server configuration
+      - FORGEJO__server__DOMAIN=git.kensai.cloud
+      - FORGEJO__server__SSH_DOMAIN=git.kensai.cloud
+      - FORGEJO__server__ROOT_URL=https://git.kensai.cloud/
+      - FORGEJO__server__SSH_PORT=2222
+      - FORGEJO__server__SSH_LISTEN_PORT=22
+      - FORGEJO__server__HTTP_PORT=3000
+      # Security
+      - FORGEJO__security__SECRET_KEY=${FORGEJO_SECRET_KEY}
+      - FORGEJO__security__INTERNAL_TOKEN=${FORGEJO_INTERNAL_TOKEN}
+      - FORGEJO__security__INSTALL_LOCK=true
+      # Service settings
+      - FORGEJO__service__DISABLE_REGISTRATION=false
+      - FORGEJO__service__ALLOW_ONLY_EXTERNAL_REGISTRATION=true
+      - FORGEJO__service__SHOW_REGISTRATION_BUTTON=false
+      # OAuth2 client settings (for Forgejo acting as OAuth2 client)
+      - FORGEJO__oauth2_client__ENABLE_AUTO_REGISTRATION=true
+      - FORGEJO__oauth2_client__USERNAME=nickname
+      - FORGEJO__oauth2_client__ACCOUNT_LINKING=auto
+      - FORGEJO__oauth2_client__UPDATE_AVATAR=true
+    volumes:
+      - forgejo-data:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      # SSH for Git operations (direct binding, not through Traefik)
+      - "2222:22"
+    networks:
+      - shared-db
+      - traefik-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-net"
+      - "traefik.http.routers.forgejo.rule=Host(`git.kensai.cloud`)"
+      - "traefik.http.routers.forgejo.entrypoints=websecure"
+      - "traefik.http.routers.forgejo.tls.certresolver=letsencrypt"
+      - "traefik.http.services.forgejo.loadbalancer.server.port=3000"
+      - "traefik.http.routers.forgejo.middlewares=security-headers@file"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:3000/api/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+volumes:
+  forgejo-data:
+
+networks:
+  shared-db:
+    external: true
+  traefik-net:
+    external: true
