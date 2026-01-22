@@ -144,9 +144,9 @@ Required database settings (set automatically):
 - `http_type`: https
 - `fqdn`: tickets.kensai.cloud
 
-## Traefik Version Pinning
+## Traefik Version Requirements
 
-Traefik is pinned to **v3.6.2** due to a bug in v3.6.4+ that breaks URL-encoded character handling (GitHub issue #12437). Collabora WOPI URLs contain encoded paths that require this to work correctly. Do not upgrade past v3.6.2 until the bug is fixed upstream.
+Traefik requires **v3.6.7+** for proper encoded slash support needed by Collabora WOPI URLs. Versions v3.6.4 through v3.6.6 had a bug breaking URL-encoded character handling (GitHub issue #12437, fixed in PR #12540).
 
 ## Collabora Online Integration
 

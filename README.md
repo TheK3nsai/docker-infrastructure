@@ -9,6 +9,7 @@ Self-hosted Docker infrastructure with Traefik reverse proxy, shared databases, 
 | Traefik | traefik.kensai.cloud | Reverse proxy dashboard |
 | Authentik | auth.kensai.cloud | Identity provider / SSO |
 | Nextcloud | cloud.kensai.cloud | File sync and collaboration |
+| Collabora | office.kensai.cloud | Online office suite for Nextcloud |
 | Uptime Kuma | uptime.kensai.cloud | Monitoring dashboard |
 | Zammad | tickets.kensai.cloud | Helpdesk / ticketing system |
 | NetBox | netbox.kensai.cloud | IPAM / DCIM infrastructure management |
@@ -17,28 +18,28 @@ Self-hosted Docker infrastructure with Traefik reverse proxy, shared databases, 
 ## Architecture
 
 ```
-                         ┌─────────────────────────────────────────┐
-                         │              Internet                    │
-                         └───────────────────┬─────────────────────┘
-                                             │ :80/:443
-                         ┌───────────────────▼─────────────────────┐
-                         │              Traefik                     │
-                         │         (reverse proxy)                  │
-                         └───────────────────┬─────────────────────┘
-                                             │ traefik-net
-      ┌──────────────┬───────────────┬───────┴───────┬───────────────┬──────────────┬──────────────┐
-      ▼              ▼               ▼               ▼               ▼              ▼              ▼
-┌──────────┐  ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐
-│ Authentik│  │ Nextcloud│   │  Zammad  │   │  Uptime  │   │  NetBox  │   │ Invoice  │   │  Future  │
-│   SSO    │  │          │   │          │   │   Kuma   │   │IPAM/DCIM │   │  Plane   │   │  Apps    │
-└────┬─────┘  └────┬─────┘   └────┬─────┘   └──────────┘   └────┬─────┘   └────┬─────┘   └────┬─────┘
-     │             │              │                              │              │              │
-     └─────────────┴──────────────┴──────────────────────────────┴──────────────┴──────────────┘
+                              ┌─────────────────────────────────────────┐
+                              │              Internet                    │
+                              └───────────────────┬─────────────────────┘
+                                                  │ :80/:443
+                              ┌───────────────────▼─────────────────────┐
+                              │              Traefik                     │
+                              │         (reverse proxy)                  │
+                              └───────────────────┬─────────────────────┘
+                                                  │ traefik-net
+      ┌──────────────┬───────────────┬────────────┴────────┬───────────────┬──────────────┬──────────────┬──────────────┐
+      ▼              ▼               ▼                     ▼               ▼              ▼              ▼              ▼
+┌──────────┐  ┌──────────┐   ┌──────────┐          ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐
+│ Authentik│  │ Nextcloud│   │ Collabora│          │  Zammad  │   │  Uptime  │   │  NetBox  │   │ Invoice  │   │  Future  │
+│   SSO    │  │          │   │  Online  │          │          │   │   Kuma   │   │IPAM/DCIM │   │  Plane   │   │  Apps    │
+└────┬─────┘  └────┬─────┘   └──────────┘          └────┬─────┘   └──────────┘   └────┬─────┘   └────┬─────┘   └────┬─────┘
+     │             │                                    │                              │              │              │
+     └─────────────┴────────────────────────────────────┴──────────────────────────────┴──────────────┴──────────────┘
                                   │ shared-db
-                    ┌─────────────┴─────────────────┐
-                    │           Shared Services              │
-                    │  PostgreSQL │ MariaDB │ Redis │ Nginx  │
-                    └────────────────────────────────────────┘
+                    ┌─────────────┴───────────────────────────┐
+                    │           Shared Services                │
+                    │  PostgreSQL │ MariaDB │ Redis │ Apache   │
+                    └──────────────────────────────────────────┘
 ```
 
 ## Prerequisites
@@ -66,6 +67,7 @@ cp nextcloud/.env.example nextcloud/.env
 cp zammad/.env.example zammad/.env
 cp netbox/.env.example netbox/.env
 cp invoiceplane/.env.example invoiceplane/.env
+cp collabora/.env.example collabora/.env
 ```
 
 ### 2. Set up Traefik certificates file
@@ -93,6 +95,7 @@ docker compose -f uptime-kuma/docker-compose.yml up -d
 docker compose -f zammad/docker-compose.yml up -d
 docker compose -f netbox/docker-compose.yml up -d
 docker compose -f invoiceplane/docker-compose.yml up -d
+docker compose -f collabora/docker-compose.yml up -d
 ```
 
 ### 4. Initial Authentik setup
@@ -133,9 +136,12 @@ docker/
 ├── netbox/
 │   ├── docker-compose.yml
 │   └── .env
-└── invoiceplane/
+├── invoiceplane/
+│   ├── docker-compose.yml
+│   ├── Dockerfile           # Custom PHP-FPM with required extensions
+│   └── .env
+└── collabora/
     ├── docker-compose.yml
-    ├── Dockerfile           # Custom PHP-FPM with required extensions
     └── .env
 ```
 
@@ -166,6 +172,7 @@ Redis databases: 0=Nextcloud, 1=Authentik, 2=Zammad, 3=NetBox, 4=NetBox-cache
 docker logs -f traefik
 docker logs -f authentik-server
 docker logs -f nextcloud
+docker logs -f collabora
 docker logs -f netbox
 docker logs -f invoiceplane
 ```
@@ -235,3 +242,6 @@ Zammad uses direct Traefik routing to railsserver:3000 (bypassing internal nginx
 
 ### InvoicePlane keeps showing setup
 InvoicePlane checks `SETUP_COMPLETED=true` in `ipconfig.php` (stored in Docker volume). Ensure this is set after completing the setup wizard.
+
+### Collabora documents not loading
+Collabora requires Traefik v3.6.7+ for encoded slash support in WOPI URLs. The container also needs `SYS_ADMIN` capability for optimal performance. Verify the Nextcloud richdocuments app is configured with WOPI URL `https://office.kensai.cloud`.

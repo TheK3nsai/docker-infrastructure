@@ -24,7 +24,7 @@ entryPoints:
     http:
       tls:
         options: default
-      # Note: v3.6.0 allows encoded characters by default (blocking added in v3.6.4)
+      # Note: v3.6.7+ required for encoded slash support (GitHub issue #12437, PR #12540)
 
 tls:
   options:

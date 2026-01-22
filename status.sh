@@ -30,6 +30,7 @@ CONTAINERS=(
     "netbox"
     "netbox-worker"
     "invoiceplane"
+    "collabora"
 )
 
 check_container() {
@@ -74,13 +75,14 @@ echo -e "  Unhealthy: ${RED}$unhealthy${NC}"
 echo -e "  Total:     $((healthy + unhealthy))"
 
 echo -e "\n${CYAN}=== Service URLs ===${NC}\n"
-echo "  Traefik:    https://traefik.kensai.cloud"
-echo "  Authentik:  https://auth.kensai.cloud"
-echo "  Nextcloud:  https://cloud.kensai.cloud"
-echo "  Uptime:     https://uptime.kensai.cloud"
-echo "  Zammad:     https://tickets.kensai.cloud"
-echo "  NetBox:     https://netbox.kensai.cloud"
+echo "  Traefik:      https://traefik.kensai.cloud"
+echo "  Authentik:    https://auth.kensai.cloud"
+echo "  Nextcloud:    https://cloud.kensai.cloud"
+echo "  Uptime:       https://uptime.kensai.cloud"
+echo "  Zammad:       https://tickets.kensai.cloud"
+echo "  NetBox:       https://netbox.kensai.cloud"
 echo "  InvoicePlane: https://invoices.kensai.cloud"
+echo "  Collabora:    https://office.kensai.cloud"
 
 echo -e "\n${CYAN}=== Resource Usage ===${NC}\n"
 docker stats --no-stream --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}" | head -20
