@@ -2,6 +2,8 @@
 
 Self-hosted Docker infrastructure with Traefik reverse proxy, shared databases, and SSO via Authentik.
 
+> **Related:** [server-ops-toolkit](https://github.com/TheK3nsai/server-ops-toolkit) - Bash scripts for security monitoring, Docker management, and compliance auditing
+
 ## Services
 
 | Service | URL | Description |
