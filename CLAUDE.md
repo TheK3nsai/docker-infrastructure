@@ -279,7 +279,27 @@ Configured in `monitoring/prometheus.yml`:
 - `monitoring/grafana/provisioning/datasources/` - Auto-provisioned datasources
 - `monitoring/grafana/provisioning/dashboards/` - Dashboard provisioning config
 - `monitoring/grafana/dashboards/` - Dashboard JSON files
-- `monitoring/.env` - Grafana admin password
+- `monitoring/.env` - Grafana admin password and SMTP credentials
+
+### Email Alerts (Gmail SMTP)
+Grafana is configured to send email alerts via Gmail SMTP. Configuration is set via environment variables in `monitoring/.env`:
+```
+GF_SMTP_USER=your-email@gmail.com
+GF_SMTP_PASSWORD=your-16-char-app-password
+GF_SMTP_FROM_ADDRESS=your-email@gmail.com
+```
+
+**Setup requirements:**
+1. Enable 2FA on your Google account
+2. Generate an App Password at https://myaccount.google.com/apppasswords
+3. Use the 16-character App Password (not your regular Gmail password)
+
+**Note:** After modifying SMTP settings in `.env`, you must recreate the container (not just restart):
+```bash
+docker compose -f monitoring/docker-compose.yml up -d grafana
+```
+
+Configure alert recipients in Grafana under **Alerting → Contact points**.
 
 ## Helper Scripts
 
