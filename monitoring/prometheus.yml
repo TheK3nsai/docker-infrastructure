@@ -21,13 +21,7 @@ scrape_configs:
     static_configs:
       - targets: ['cadvisor:8080']
 
-  # Traefik metrics (uncomment after enabling metrics in traefik/traefik.yml)
-  # Add to traefik.yml:
-  #   metrics:
-  #     prometheus:
-  #       addEntryPointsLabels: true
-  #       addServicesLabels: true
-  #       addRoutersLabels: true
-  # - job_name: 'traefik'
-  #   static_configs:
-  #     - targets: ['traefik:8082']
+  # Traefik metrics
+  - job_name: 'traefik'
+    static_configs:
+      - targets: ['traefik:8082']

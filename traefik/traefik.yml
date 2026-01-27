@@ -1,6 +1,13 @@
 api:
   dashboard: true
 
+metrics:
+  prometheus:
+    entryPoint: metrics
+    addEntryPointsLabels: true
+    addServicesLabels: true
+    addRoutersLabels: true
+
 log:
   level: INFO
 
@@ -12,6 +19,8 @@ accessLog:
       - "400-599"
 
 entryPoints:
+  metrics:
+    address: ":8082"
   web:
     address: ":80"
     http:

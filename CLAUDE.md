@@ -271,18 +271,7 @@ Configured in `monitoring/prometheus.yml`:
 - `prometheus` (localhost:9090): Prometheus self-monitoring
 - `node-exporter` (node-exporter:9100): Host metrics
 - `cadvisor` (cadvisor:8080): Container metrics
-
-### Enabling Traefik Metrics
-To add Traefik metrics to Prometheus, add to `traefik/traefik.yml`:
-```yaml
-metrics:
-  prometheus:
-    addEntryPointsLabels: true
-    addServicesLabels: true
-    addRoutersLabels: true
-```
-
-Then uncomment the traefik job in `monitoring/prometheus.yml`.
+- `traefik` (traefik:8082): Traefik reverse proxy metrics
 
 ### Configuration Files
 - `monitoring/docker-compose.yml` - All monitoring services
