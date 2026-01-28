@@ -20,9 +20,11 @@ This is a Docker-based self-hosted infrastructure using Traefik v3 as reverse pr
 4. **Application stacks**: nextcloud/, uptime-kuma/, zammad/, netbox/, invoiceplane/, collabora/, forgejo/
 
 ### Database Assignments
-- **PostgreSQL** (shared-postgres): Zammad, Authentik, NetBox, Forgejo
+- **PostgreSQL** (shared-postgres): Zammad, Authentik (including cache/sessions), NetBox, Forgejo
 - **MariaDB** (shared-mariadb): Nextcloud, InvoicePlane
-- **Redis** (shared-redis): DB0=Nextcloud, DB1=Authentik, DB2=Zammad, DB3=NetBox, DB4=NetBox-cache, DB5=Forgejo
+- **Redis** (shared-redis): DB0=Nextcloud, DB1=(available), DB2=Zammad, DB3=NetBox, DB4=NetBox-cache, DB5=Forgejo
+
+Note: Authentik 2025.10+ no longer requires Redis - caching, tasks, and WebSockets are handled by PostgreSQL.
 
 ### Authentication
 Authentik provides SSO via two methods:

@@ -57,7 +57,7 @@ services:
       retries: 5
 
   # ============================================
-  # Redis - Nextcloud, Authentik, future apps
+  # Redis - Nextcloud, Zammad, NetBox, Forgejo
   # ============================================
   redis:
     image: redis:7.4-alpine
@@ -84,7 +84,7 @@ services:
   # Authentik Server
   # ============================================
   authentik-server:
-    image: ghcr.io/goauthentik/server:2025.10
+    image: ghcr.io/goauthentik/server:2025.12.1
     container_name: authentik-server
     restart: unless-stopped
     deploy:
@@ -96,8 +96,6 @@ services:
     command: server
     environment:
       AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY}
-      AUTHENTIK_REDIS__HOST: shared-redis
-      AUTHENTIK_REDIS__DB: 1
       AUTHENTIK_POSTGRESQL__HOST: shared-postgres
       AUTHENTIK_POSTGRESQL__USER: authentik
       AUTHENTIK_POSTGRESQL__PASSWORD: ${POSTGRES_PASSWORD}
@@ -107,8 +105,6 @@ services:
       - authentik-templates:/templates
     depends_on:
       postgres:
-        condition: service_healthy
-      redis:
         condition: service_healthy
     networks:
       - shared-db
@@ -125,7 +121,7 @@ services:
   # Authentik Worker
   # ============================================
   authentik-worker:
-    image: ghcr.io/goauthentik/server:2025.10
+    image: ghcr.io/goauthentik/server:2025.12.1
     container_name: authentik-worker
     restart: unless-stopped
     deploy:
@@ -137,8 +133,6 @@ services:
     command: worker
     environment:
       AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY}
-      AUTHENTIK_REDIS__HOST: shared-redis
-      AUTHENTIK_REDIS__DB: 1
       AUTHENTIK_POSTGRESQL__HOST: shared-postgres
       AUTHENTIK_POSTGRESQL__USER: authentik
       AUTHENTIK_POSTGRESQL__PASSWORD: ${POSTGRES_PASSWORD}
@@ -148,8 +142,6 @@ services:
       - authentik-templates:/templates
     depends_on:
       postgres:
-        condition: service_healthy
-      redis:
         condition: service_healthy
     networks:
       - shared-db
