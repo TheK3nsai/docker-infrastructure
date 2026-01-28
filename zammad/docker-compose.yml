@@ -25,7 +25,7 @@ x-zammad-service: &zammad-service
 
 services:
   zammad-elasticsearch:
-    image: elasticsearch:${ELASTICSEARCH_VERSION:-8.18.0}
+    image: elasticsearch:${ELASTICSEARCH_VERSION:-8.18.8}
     container_name: zammad-elasticsearch
     restart: ${RESTART:-unless-stopped}
     deploy:

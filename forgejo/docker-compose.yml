@@ -3,7 +3,7 @@
 
 services:
   forgejo:
-    image: codeberg.org/forgejo/forgejo:${FORGEJO_VERSION:-10}
+    image: codeberg.org/forgejo/forgejo:${FORGEJO_VERSION:-14}
     container_name: forgejo
     restart: unless-stopped
     deploy:
