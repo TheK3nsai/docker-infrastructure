@@ -60,7 +60,7 @@ services:
   # Redis - Nextcloud, Zammad, NetBox, Forgejo
   # ============================================
   redis:
-    image: redis:7.4-alpine
+    image: redis:8.4-alpine
     container_name: shared-redis
     restart: unless-stopped
     deploy:
