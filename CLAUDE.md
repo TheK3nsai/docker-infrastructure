@@ -122,7 +122,7 @@ All containers have memory limits configured to prevent OOM situations. The host
 | monitoring | prometheus | 512m | 256m |
 | monitoring | grafana | 512m | 256m |
 | monitoring | node-exporter | 128m | 64m |
-| monitoring | cadvisor | 256m | 128m |
+| monitoring | cadvisor | 512m | 256m |
 
 ## Shared Web Servers
 
