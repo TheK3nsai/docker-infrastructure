@@ -93,7 +93,29 @@ Note: Init scripts only run on first container creation. For existing installati
 
 ## Memory Management
 
-All containers have memory limits configured to prevent OOM situations. The host requires a 4GB swap file for safety.
+All containers have memory limits configured to prevent OOM situations.
+
+### Host System Requirements
+
+**Swap file (4GB minimum):**
+```bash
+# Create swap file if not exists
+sudo fallocate -l 4G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+```
+
+**Kernel optimizations** (`/etc/sysctl.d/99-docker-optimization.conf`):
+```
+vm.swappiness = 30              # Prefer RAM, swap only when necessary (default: 60)
+vm.vfs_cache_pressure = 50      # Keep filesystem caches longer for Docker (default: 100)
+```
+
+Apply without reboot: `sudo sysctl --system`
+
+### Container Memory Limits
 
 | Stack | Container | Limit | Reservation |
 |-------|-----------|-------|-------------|
