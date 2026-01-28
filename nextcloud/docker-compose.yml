@@ -3,7 +3,7 @@
 
 services:
   nextcloud:
-    image: nextcloud
+    image: nextcloud:latest
     container_name: nextcloud
     restart: unless-stopped
     deploy:
@@ -41,7 +41,7 @@ services:
       - "traefik.http.routers.nextcloud.middlewares=security-headers@file"
 
   nextcloud-cron:
-    image: nextcloud
+    image: nextcloud:latest
     container_name: nextcloud-cron
     restart: unless-stopped
     deploy:

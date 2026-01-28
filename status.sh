@@ -15,7 +15,6 @@ CONTAINERS=(
     "shared-postgres"
     "shared-mariadb"
     "shared-redis"
-    "shared-nginx"
     "shared-apache"
     "authentik-server"
     "authentik-worker"

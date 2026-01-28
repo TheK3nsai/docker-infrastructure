@@ -15,7 +15,7 @@ This is a Docker-based self-hosted infrastructure using Traefik v3 as reverse pr
 
 ### Service Stack Order (start in this order)
 1. **traefik/** - Reverse proxy + socket-proxy (creates traefik-net and socket-proxy networks)
-2. **shared-services/** - PostgreSQL, MariaDB, Redis, Authentik, shared-nginx, shared-apache (creates shared-db network)
+2. **shared-services/** - PostgreSQL, MariaDB, Redis, Authentik, shared-apache (creates shared-db network)
 3. **monitoring/** - Prometheus, Grafana, Node Exporter, cAdvisor (creates monitoring network)
 4. **Application stacks**: nextcloud/, uptime-kuma/, zammad/, netbox/, invoiceplane/, collabora/, forgejo/
 
@@ -104,7 +104,6 @@ All containers have memory limits configured to prevent OOM situations. The host
 | shared-services | redis | 256m | 128m |
 | shared-services | authentik-server | 1g | 512m |
 | shared-services | authentik-worker | 768m | 384m |
-| shared-services | nginx | 256m | 128m |
 | shared-services | apache | 256m | 128m |
 | nextcloud | nextcloud | 1g | 512m |
 | nextcloud | nextcloud-cron | 256m | 128m |
@@ -124,18 +123,7 @@ All containers have memory limits configured to prevent OOM situations. The host
 | monitoring | node-exporter | 128m | 64m |
 | monitoring | cadvisor | 512m | 256m |
 
-## Shared Web Servers
-
-### Shared Nginx
-The shared-nginx container in shared-services is available for future Rails/static applications.
-
-Configuration files are in `shared-services/nginx/`:
-- `nginx.conf` - Main nginx configuration
-- `conf.d/` - Virtual host configurations
-
-To add a new app to shared-nginx, create a new `.conf` file in `conf.d/` and reload: `docker exec shared-nginx nginx -s reload`
-
-### Shared Apache
+## Shared Apache
 The shared-apache container in shared-services proxies requests for PHP-FPM applications:
 - **InvoicePlane** (invoices.kensai.cloud) - Serves static files, proxies PHP to invoiceplane:9000
 
@@ -312,7 +300,6 @@ Configure alert recipients in Grafana under **Alerting → Contact points**.
 - `traefik/traefik.yml` - Static config (entrypoints, providers, TLS settings)
 - `traefik/dynamic.yml` - Dynamic config (middlewares, watched for changes)
 - `traefik/acme.json` - Let's Encrypt certificates (auto-managed)
-- `shared-services/nginx/` - Shared nginx configuration
 - `shared-services/apache/` - Shared apache configuration
 - `shared-services/init-scripts/` - Database initialization SQL scripts
 - `monitoring/prometheus.yml` - Prometheus scrape configuration
