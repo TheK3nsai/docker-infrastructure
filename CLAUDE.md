@@ -26,6 +26,25 @@ This is a Docker-based self-hosted infrastructure using Traefik v3 as reverse pr
 
 Note: Authentik 2025.10+ no longer requires Redis - caching, tasks, and WebSockets are handled by PostgreSQL.
 
+### Service Versions (as of January 2026)
+| Service | Version | Notes |
+|---------|---------|-------|
+| Traefik | v3.6.7 | Reverse proxy |
+| Socket Proxy | v0.4.2 | Docker socket security |
+| PostgreSQL | 16-alpine | Shared database |
+| MariaDB | 10.11 | Shared database |
+| Redis | 8.4-alpine | Shared cache |
+| Authentik | 2025.12.1 | SSO provider (no Redis needed) |
+| Nextcloud | latest (32.x) | File sync |
+| Uptime Kuma | 2.x | Monitoring |
+| Zammad | 6.5.2-55 | Ticketing |
+| Elasticsearch | 8.18.8 | Zammad search |
+| NetBox | v4.5.1 | DCIM/IPAM |
+| Forgejo | 14.x | Git forge |
+| Collabora | latest | Document editing |
+| Prometheus | latest (3.x) | Metrics |
+| Grafana | latest (12.x) | Dashboards |
+
 ### Authentication
 Authentik provides SSO via two methods:
 - **Proxy authentication**: Services use the `authentik@file` middleware in Traefik (e.g., Traefik Dashboard, Uptime Kuma, NetBox, InvoicePlane)
