@@ -33,7 +33,7 @@ services:
   # MariaDB - Nextcloud, future apps
   # ============================================
   mariadb:
-    image: mariadb:10.11
+    image: mariadb:11.4
     container_name: shared-mariadb
     restart: unless-stopped
     deploy:
@@ -45,6 +45,7 @@ services:
     command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MARIADB_AUTO_UPGRADE: "1"
     volumes:
       - mariadb-data:/var/lib/mysql
       - ./init-scripts/mariadb:/docker-entrypoint-initdb.d:ro
@@ -57,7 +58,7 @@ services:
       retries: 5
 
   # ============================================
-  # Redis - Nextcloud, Zammad, NetBox, Forgejo
+  # Redis - Nextcloud, Zammad, NetBox
   # ============================================
   redis:
     image: redis:8.4-alpine
@@ -66,9 +67,9 @@ services:
     deploy:
       resources:
         limits:
-          memory: 256m
-        reservations:
           memory: 128m
+        reservations:
+          memory: 64m
     command: redis-server --save 60 1 --loglevel warning --databases 16
     volumes:
       - redis-data:/data
@@ -156,9 +157,9 @@ services:
     deploy:
       resources:
         limits:
-          memory: 256m
-        reservations:
           memory: 128m
+        reservations:
+          memory: 64m
     volumes:
       - ./apache/httpd.conf:/usr/local/apache2/conf/httpd.conf:ro
       - ./apache/sites-enabled:/usr/local/apache2/conf/sites-enabled:ro

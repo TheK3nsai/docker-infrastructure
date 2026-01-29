@@ -32,7 +32,7 @@ Note: Authentik 2025.10+ no longer requires Redis - caching, tasks, and WebSocke
 | Traefik | v3.6.7 | Reverse proxy |
 | Socket Proxy | v0.4.2 | Docker socket security |
 | PostgreSQL | 16-alpine | Shared database |
-| MariaDB | 10.11 | Shared database |
+| MariaDB | 11.4 | Shared database |
 | Redis | 8.4-alpine | Shared cache |
 | Authentik | 2025.12.1 | SSO provider (no Redis needed) |
 | Nextcloud | latest (32.x) | File sync |
@@ -132,26 +132,26 @@ Apply without reboot: `sudo sysctl --system`
 
 | Stack | Container | Limit | Reservation |
 |-------|-----------|-------|-------------|
-| traefik | socket-proxy | 256m | 128m |
+| traefik | socket-proxy | 128m | 64m |
 | traefik | traefik | 512m | 256m |
 | shared-services | postgres | 512m | 256m |
 | shared-services | mariadb | 512m | 256m |
-| shared-services | redis | 256m | 128m |
+| shared-services | redis | 128m | 64m |
 | shared-services | authentik-server | 1g | 512m |
 | shared-services | authentik-worker | 768m | 384m |
-| shared-services | apache | 256m | 128m |
+| shared-services | apache | 128m | 64m |
 | nextcloud | nextcloud | 1g | 512m |
-| nextcloud | nextcloud-cron | 256m | 128m |
+| nextcloud | nextcloud-cron | 128m | 64m |
 | zammad | elasticsearch | 1200m | 768m |
 | zammad | memcached | 128m | 96m |
 | zammad | railsserver | 512m | 256m |
 | zammad | scheduler | 512m | 256m |
-| zammad | websocket | 512m | 256m |
+| zammad | websocket | 384m | 256m |
 | netbox | netbox | 768m | 384m |
 | netbox | netbox-worker | 512m | 256m |
 | invoiceplane | invoiceplane | 384m | 192m |
 | collabora | collabora | 1536m | 1g |
-| monitoring | prometheus | 512m | 256m |
+| monitoring | prometheus | 1g | 512m |
 | monitoring | grafana | 512m | 256m |
 | monitoring | node-exporter | 128m | 64m |
 | monitoring | cadvisor | 512m | 256m |
