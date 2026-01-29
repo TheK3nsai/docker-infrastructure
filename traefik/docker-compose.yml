@@ -8,9 +8,9 @@ services:
     deploy:
       resources:
         limits:
-          memory: 256m
-        reservations:
           memory: 128m
+        reservations:
+          memory: 64m
     environment:
       CONTAINERS: 1
       SERVICES: 0
