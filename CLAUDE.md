@@ -17,12 +17,12 @@ This is a Docker-based self-hosted infrastructure using Traefik v3 as reverse pr
 1. **traefik/** - Reverse proxy + socket-proxy (creates traefik-net and socket-proxy networks)
 2. **shared-services/** - PostgreSQL, MariaDB, Redis, Authentik, shared-apache (creates shared-db network)
 3. **monitoring/** - Prometheus, Grafana, Node Exporter, cAdvisor (creates monitoring network)
-4. **Application stacks**: nextcloud/, zammad/, netbox/, invoiceplane/, collabora/, forgejo/
+4. **Application stacks**: nextcloud/, zammad/, netbox/, invoiceplane/, collabora/
 
 ### Database Assignments
-- **PostgreSQL** (shared-postgres): Zammad, Authentik (including cache/sessions), NetBox, Forgejo
+- **PostgreSQL** (shared-postgres): Zammad, Authentik (including cache/sessions), NetBox
 - **MariaDB** (shared-mariadb): Nextcloud, InvoicePlane
-- **Redis** (shared-redis): DB0=Nextcloud, DB1=(available), DB2=Zammad, DB3=NetBox, DB4=NetBox-cache, DB5=Forgejo
+- **Redis** (shared-redis): DB0=Nextcloud, DB1=(available), DB2=Zammad, DB3=NetBox, DB4=NetBox-cache, DB5=(available)
 
 Note: Authentik 2025.10+ no longer requires Redis - caching, tasks, and WebSockets are handled by PostgreSQL.
 
@@ -39,15 +39,12 @@ Note: Authentik 2025.10+ no longer requires Redis - caching, tasks, and WebSocke
 | Zammad | 6.5.2-55 | Ticketing |
 | Elasticsearch | 8.18.8 | Zammad search |
 | NetBox | v4.5.1 | DCIM/IPAM |
-| Forgejo | 14.x | Git forge |
 | Collabora | latest | Document editing |
 | Prometheus | latest (3.x) | Metrics |
 | Grafana | latest (12.x) | Dashboards |
 
 ### Authentication
-Authentik provides SSO via two methods:
-- **Proxy authentication**: Services use the `authentik@file` middleware in Traefik (e.g., Traefik Dashboard, NetBox, InvoicePlane)
-- **OAuth2/OIDC**: Services use native OAuth2 login with Authentik as identity provider (e.g., Forgejo)
+Authentik provides SSO via proxy authentication: Services use the `authentik@file` middleware in Traefik (e.g., Traefik Dashboard, NetBox, InvoicePlane, Grafana).
 
 ## Common Commands
 
@@ -61,7 +58,6 @@ docker compose -f zammad/docker-compose.yml up -d
 docker compose -f netbox/docker-compose.yml up -d
 docker compose -f invoiceplane/docker-compose.yml up -d
 docker compose -f collabora/docker-compose.yml up -d
-docker compose -f forgejo/docker-compose.yml up -d
 
 # View logs
 docker logs -f <container-name>
@@ -83,7 +79,6 @@ docker logs traefik 2>&1 | grep -i error
 - NetBox: netbox.kensai.cloud (protected by Authentik)
 - InvoicePlane: invoices.kensai.cloud (protected by Authentik)
 - Collabora: office.kensai.cloud (document editing for Nextcloud)
-- Forgejo: git.kensai.cloud (OAuth2 via Authentik, SSH on port 2222)
 
 ## Adding New Services
 
@@ -156,7 +151,6 @@ Apply without reboot: `sudo sysctl --system`
 | netbox | netbox-worker | 512m | 256m |
 | invoiceplane | invoiceplane | 384m | 192m |
 | collabora | collabora | 1536m | 1g |
-| forgejo | forgejo | 512m | 256m |
 | monitoring | prometheus | 512m | 256m |
 | monitoring | grafana | 512m | 256m |
 | monitoring | node-exporter | 128m | 64m |
@@ -217,44 +211,6 @@ Collabora uses multiple middlewares and a custom serversTransport in `traefik/dy
 - `collabora-headers@file`: Security headers with CSP frame-ancestors for Nextcloud embedding
 - `collabora-websocket@file`: Adds X-Forwarded-Proto header
 - `collabora-transport@file`: Custom timeouts for WebSocket connections (responseHeaderTimeout: 0s)
-
-## Forgejo OAuth2 Integration
-
-Forgejo uses native OAuth2/OpenID Connect authentication with Authentik (not proxy authentication).
-
-### Authentication Flow
-Users access Forgejo directly and click "Sign in with Authentik" on the login page. This uses Forgejo's built-in OAuth2 client to authenticate against Authentik.
-
-### Configuration
-OAuth2 is configured via:
-1. **Environment variables** in `forgejo/docker-compose.yml`:
-   ```yaml
-   - FORGEJO__oauth2_client__ENABLE_AUTO_REGISTRATION=true
-   - FORGEJO__oauth2_client__USERNAME=nickname
-   - FORGEJO__oauth2_client__ACCOUNT_LINKING=auto
-   - FORGEJO__service__ALLOW_ONLY_EXTERNAL_REGISTRATION=true
-   ```
-
-2. **OAuth2 authentication source** stored in database (added via CLI):
-   ```bash
-   docker exec -u git forgejo forgejo --config /data/gitea/conf/app.ini admin auth add-oauth \
-     --name "Authentik" \
-     --provider openidConnect \
-     --key "<client_id>" \
-     --secret "<client_secret>" \
-     --auto-discover-url "https://auth.kensai.cloud/application/o/forgejo/.well-known/openid-configuration"
-   ```
-
-### Authentik Requirements
-In Authentik, configure an **OAuth2/OpenID Provider** (not Proxy Provider) with:
-- **Client ID/Secret**: As configured in Forgejo
-- **Redirect URI**: `https://git.kensai.cloud/user/oauth2/Authentik/callback`
-- **Scopes**: openid, email, profile
-
-### Key Differences from Proxy Auth
-- No `authentik@file` middleware in Traefik labels (users access Forgejo directly)
-- Authentication happens through Forgejo's login page, not Authentik's proxy
-- Users can still access public repositories without authentication
 
 ## Monitoring Stack
 

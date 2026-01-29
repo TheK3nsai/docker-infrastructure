@@ -10,7 +10,6 @@ log() { echo -e "${GREEN}[INFO]${NC} $1"; }
 
 # Stop in reverse order
 log "Stopping applications..."
-docker compose -f forgejo/docker-compose.yml down
 docker compose -f collabora/docker-compose.yml down
 docker compose -f invoiceplane/docker-compose.yml down
 docker compose -f netbox/docker-compose.yml down
