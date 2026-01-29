@@ -6,7 +6,7 @@ services:
   # PostgreSQL - Zammad, Authentik, future apps
   # ============================================
   postgres:
-    image: postgres:16-alpine
+    image: postgres:17-alpine
     container_name: shared-postgres
     restart: unless-stopped
     deploy:
@@ -19,8 +19,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      - postgres-data-16:/var/lib/postgresql/data
-      - ./init-scripts/postgres:/docker-entrypoint-initdb.d:ro
+      - postgres-data-17:/var/lib/postgresql/data
     networks:
       - shared-db
     healthcheck:
@@ -180,7 +179,7 @@ services:
       - "traefik.http.services.shared-apache.loadbalancer.server.port=80"
 
 volumes:
-  postgres-data-16:
+  postgres-data-17:
   mariadb-data:
   redis-data:
   authentik-media:
