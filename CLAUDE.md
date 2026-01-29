@@ -289,14 +289,14 @@ Alert rules are provisioned via file at `monitoring/grafana/provisioning/alertin
 
 **Configured alerts** (folder: Infrastructure, evaluation interval: 1m):
 
-| Alert | Condition | Duration | Severity |
-|-------|-----------|----------|----------|
-| High Memory Usage | Memory usage > 85% | 5m | critical |
-| Disk Space Low | Root filesystem usage > 85% | 5m | warning |
-| High Load Average | 15-min load average > 4 | 10m | warning |
-| Critical Container Down | Any of: traefik, shared-postgres, shared-mariadb, shared-redis, authentik-server missing | 1m | critical |
-| High HTTP Error Rate | 5xx errors > 5% of requests | 5m | warning |
-| Traefik Down | Traefik metrics endpoint unreachable | 1m | critical |
+| Alert | Condition | Duration | Severity | Notes |
+|-------|-----------|----------|----------|-------|
+| High Memory Usage | Memory usage > 85% | 5m | critical | |
+| Disk Space Low | Root filesystem usage > 85% | 5m | warning | |
+| High Load Average | 15-min load average > 4 | 10m | warning | |
+| Critical Container Down | Any of: traefik, shared-postgres, shared-mariadb, shared-redis, authentik-server missing | 1m | critical | |
+| High HTTP Error Rate | 5xx errors > 5% of requests | 5m | warning | noDataState: OK (no 5xx = healthy) |
+| Traefik Down | Traefik metrics endpoint unreachable | 1m | critical | |
 
 All alerts send notifications to the "Email" contact point.
 
