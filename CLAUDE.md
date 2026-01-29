@@ -17,7 +17,7 @@ This is a Docker-based self-hosted infrastructure using Traefik v3 as reverse pr
 1. **traefik/** - Reverse proxy + socket-proxy (creates traefik-net and socket-proxy networks)
 2. **shared-services/** - PostgreSQL, MariaDB, Redis, Authentik, shared-apache (creates shared-db network)
 3. **monitoring/** - Prometheus, Grafana, Node Exporter, cAdvisor (creates monitoring network)
-4. **Application stacks**: nextcloud/, uptime-kuma/, zammad/, netbox/, invoiceplane/, collabora/, forgejo/
+4. **Application stacks**: nextcloud/, zammad/, netbox/, invoiceplane/, collabora/, forgejo/
 
 ### Database Assignments
 - **PostgreSQL** (shared-postgres): Zammad, Authentik (including cache/sessions), NetBox, Forgejo
@@ -36,7 +36,6 @@ Note: Authentik 2025.10+ no longer requires Redis - caching, tasks, and WebSocke
 | Redis | 8.4-alpine | Shared cache |
 | Authentik | 2025.12.1 | SSO provider (no Redis needed) |
 | Nextcloud | latest (32.x) | File sync |
-| Uptime Kuma | 2.x | Monitoring |
 | Zammad | 6.5.2-55 | Ticketing |
 | Elasticsearch | 8.18.8 | Zammad search |
 | NetBox | v4.5.1 | DCIM/IPAM |
@@ -47,7 +46,7 @@ Note: Authentik 2025.10+ no longer requires Redis - caching, tasks, and WebSocke
 
 ### Authentication
 Authentik provides SSO via two methods:
-- **Proxy authentication**: Services use the `authentik@file` middleware in Traefik (e.g., Traefik Dashboard, Uptime Kuma, NetBox, InvoicePlane)
+- **Proxy authentication**: Services use the `authentik@file` middleware in Traefik (e.g., Traefik Dashboard, NetBox, InvoicePlane)
 - **OAuth2/OIDC**: Services use native OAuth2 login with Authentik as identity provider (e.g., Forgejo)
 
 ## Common Commands
@@ -58,7 +57,6 @@ docker compose -f traefik/docker-compose.yml up -d
 docker compose -f shared-services/docker-compose.yml up -d
 docker compose -f monitoring/docker-compose.yml up -d
 docker compose -f nextcloud/docker-compose.yml up -d
-docker compose -f uptime-kuma/docker-compose.yml up -d
 docker compose -f zammad/docker-compose.yml up -d
 docker compose -f netbox/docker-compose.yml up -d
 docker compose -f invoiceplane/docker-compose.yml up -d
@@ -81,7 +79,6 @@ docker logs traefik 2>&1 | grep -i error
 - Prometheus: prometheus.kensai.cloud (protected by Authentik)
 - Grafana: grafana.kensai.cloud (protected by Authentik)
 - Nextcloud: cloud.kensai.cloud
-- Uptime Kuma: uptime.kensai.cloud (protected by Authentik)
 - Zammad: tickets.kensai.cloud
 - NetBox: netbox.kensai.cloud (protected by Authentik)
 - InvoicePlane: invoices.kensai.cloud (protected by Authentik)
@@ -150,7 +147,6 @@ Apply without reboot: `sudo sysctl --system`
 | shared-services | apache | 256m | 128m |
 | nextcloud | nextcloud | 1g | 512m |
 | nextcloud | nextcloud-cron | 256m | 128m |
-| uptime-kuma | uptime-kuma | 512m | 256m |
 | zammad | elasticsearch | 1200m | 768m |
 | zammad | memcached | 128m | 96m |
 | zammad | railsserver | 512m | 256m |

@@ -7,7 +7,6 @@
 
 # Applications
 /nextcloud/ @TheK3nsai
-/uptime-kuma/ @TheK3nsai
 /zammad/ @TheK3nsai
 
 # CI/CD

@@ -50,7 +50,6 @@ docker compose -f monitoring/docker-compose.yml up -d
 # 4. Applications (parallel)
 log "Starting applications..."
 docker compose -f nextcloud/docker-compose.yml up -d
-docker compose -f uptime-kuma/docker-compose.yml up -d
 docker compose -f zammad/docker-compose.yml up -d
 docker compose -f netbox/docker-compose.yml up -d
 docker compose -f invoiceplane/docker-compose.yml up -d

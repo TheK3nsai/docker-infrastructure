@@ -37,9 +37,6 @@ jobs:
       - name: Validate nextcloud
         run: docker compose -f nextcloud/docker-compose.yml config --quiet
 
-      - name: Validate uptime-kuma
-        run: docker compose -f uptime-kuma/docker-compose.yml config --quiet
-
       - name: Validate zammad
         run: docker compose -f zammad/docker-compose.yml config --quiet
 

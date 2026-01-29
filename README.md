@@ -12,7 +12,6 @@ Self-hosted Docker infrastructure with Traefik reverse proxy, shared databases, 
 | Authentik | auth.kensai.cloud | Identity provider / SSO |
 | Nextcloud | cloud.kensai.cloud | File sync and collaboration |
 | Collabora | office.kensai.cloud | Online office suite for Nextcloud |
-| Uptime Kuma | uptime.kensai.cloud | Monitoring dashboard |
 | Zammad | tickets.kensai.cloud | Helpdesk / ticketing system |
 | NetBox | netbox.kensai.cloud | IPAM / DCIM infrastructure management |
 | InvoicePlane | invoices.kensai.cloud | Open source invoicing |
@@ -29,12 +28,12 @@ Self-hosted Docker infrastructure with Traefik reverse proxy, shared databases, 
                               │         (reverse proxy)                  │
                               └───────────────────┬─────────────────────┘
                                                   │ traefik-net
-      ┌──────────────┬───────────────┬────────────┴────────┬───────────────┬──────────────┬──────────────┬──────────────┐
-      ▼              ▼               ▼                     ▼               ▼              ▼              ▼              ▼
-┌──────────┐  ┌──────────┐   ┌──────────┐          ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐
-│ Authentik│  │ Nextcloud│   │ Collabora│          │  Zammad  │   │  Uptime  │   │  NetBox  │   │ Invoice  │   │  Future  │
-│   SSO    │  │          │   │  Online  │          │          │   │   Kuma   │   │IPAM/DCIM │   │  Plane   │   │  Apps    │
-└────┬─────┘  └────┬─────┘   └──────────┘          └────┬─────┘   └──────────┘   └────┬─────┘   └────┬─────┘   └────┬─────┘
+      ┌──────────────┬───────────────┬────────────┴────────┬──────────────┬──────────────┬──────────────┐
+      ▼              ▼               ▼                     ▼              ▼              ▼              ▼
+┌──────────┐  ┌──────────┐   ┌──────────┐          ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐
+│ Authentik│  │ Nextcloud│   │ Collabora│          │  Zammad  │   │  NetBox  │   │ Invoice  │   │  Future  │
+│   SSO    │  │          │   │  Online  │          │          │   │IPAM/DCIM │   │  Plane   │   │  Apps    │
+└────┬─────┘  └────┬─────┘   └──────────┘          └────┬─────┘   └────┬─────┘   └────┬─────┘   └────┬─────┘
      │             │                                    │                              │              │              │
      └─────────────┴────────────────────────────────────┴──────────────────────────────┴──────────────┴──────────────┘
                                   │ shared-db
@@ -93,7 +92,6 @@ docker compose -f shared-services/docker-compose.yml ps
 
 # 4. Start applications
 docker compose -f nextcloud/docker-compose.yml up -d
-docker compose -f uptime-kuma/docker-compose.yml up -d
 docker compose -f zammad/docker-compose.yml up -d
 docker compose -f netbox/docker-compose.yml up -d
 docker compose -f invoiceplane/docker-compose.yml up -d
@@ -130,8 +128,6 @@ docker/
 ├── nextcloud/
 │   ├── docker-compose.yml
 │   └── .env
-├── uptime-kuma/
-│   └── docker-compose.yml
 ├── zammad/
 │   ├── docker-compose.yml
 │   └── .env

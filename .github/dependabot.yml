@@ -22,13 +22,6 @@ updates:
       prefix: "docker"
 
   - package-ecosystem: "docker"
-    directory: "/uptime-kuma"
-    schedule:
-      interval: "weekly"
-    commit-message:
-      prefix: "docker"
-
-  - package-ecosystem: "docker"
     directory: "/zammad"
     schedule:
       interval: "weekly"
