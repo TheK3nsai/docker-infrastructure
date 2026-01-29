@@ -284,6 +284,31 @@ docker compose -f monitoring/docker-compose.yml up -d grafana
 
 Configure alert recipients in Grafana under **Alerting → Contact points**.
 
+### Alert Rules (File Provisioned)
+Alert rules are provisioned via file at `monitoring/grafana/provisioning/alerting/`. Edit the YAML file and restart Grafana to update rules. UI-based edits will not persist across container restarts.
+
+**Configured alerts** (folder: Infrastructure, evaluation interval: 1m):
+
+| Alert | Condition | Duration | Severity |
+|-------|-----------|----------|----------|
+| High Memory Usage | Memory usage > 85% | 5m | critical |
+| Disk Space Low | Root filesystem usage > 85% | 5m | warning |
+| High Load Average | 15-min load average > 4 | 10m | warning |
+| Critical Container Down | Any of: traefik, shared-postgres, shared-mariadb, shared-redis, authentik-server missing | 1m | critical |
+| High HTTP Error Rate | 5xx errors > 5% of requests | 5m | warning |
+| Traefik Down | Traefik metrics endpoint unreachable | 1m | critical |
+
+All alerts send notifications to the "Email" contact point.
+
+**Modifying alerts:**
+```bash
+# Edit the alert rules file
+vim monitoring/grafana/provisioning/alerting/alert-rules-*.yaml
+
+# Restart Grafana to apply changes
+docker compose -f monitoring/docker-compose.yml restart grafana
+```
+
 ## Helper Scripts
 
 - `./start.sh` - Start all services in correct order with health checks
@@ -299,6 +324,7 @@ Configure alert recipients in Grafana under **Alerting → Contact points**.
 - `shared-services/init-scripts/` - Database initialization SQL scripts
 - `monitoring/prometheus.yml` - Prometheus scrape configuration
 - `monitoring/grafana/provisioning/` - Grafana auto-provisioning configs
+- `monitoring/grafana/provisioning/alerting/` - File-provisioned alert rules
 - `monitoring/grafana/dashboards/` - Pre-installed Grafana dashboards
 - `.env` files in each stack directory contain secrets
 
