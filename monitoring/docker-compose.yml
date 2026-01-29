@@ -88,6 +88,54 @@ services:
       retries: 3
       start_period: 30s
 
+  # ============================================
+  # PostgreSQL Exporter - Database metrics
+  # ============================================
+  postgres-exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter:latest
+    container_name: postgres-exporter
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 128m
+        reservations:
+          memory: 64m
+    environment:
+      DATA_SOURCE_NAME: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@shared-postgres:5432/postgres?sslmode=disable"
+    networks:
+      - monitoring
+      - shared-db
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9187/metrics"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================
+  # Redis Exporter - Cache metrics
+  # ============================================
+  redis-exporter:
+    image: oliver006/redis_exporter:latest
+    container_name: redis-exporter
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 64m
+        reservations:
+          memory: 32m
+    environment:
+      REDIS_ADDR: "redis://shared-redis:6379"
+    networks:
+      - monitoring
+      - shared-db
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9121/metrics"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
@@ -141,6 +189,8 @@ networks:
     external: true
   monitoring:
     driver: bridge
+  shared-db:
+    external: true
 
 volumes:
   prometheus-data:

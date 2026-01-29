@@ -158,6 +158,8 @@ Apply without reboot: `sudo sysctl --system`
 | monitoring | grafana | 512m | 256m |
 | monitoring | node-exporter | 128m | 64m |
 | monitoring | cadvisor | 512m | 256m |
+| monitoring | postgres-exporter | 128m | 64m |
+| monitoring | redis-exporter | 64m | 32m |
 | homer | homer | 64m | 32m |
 
 ## Shared Apache
@@ -226,10 +228,13 @@ The monitoring stack provides infrastructure and container metrics collection an
 - **Grafana** (grafana.kensai.cloud): Metrics visualization and dashboards
 - **Node Exporter**: Host system metrics (CPU, memory, disk, network)
 - **cAdvisor**: Container metrics (per-container CPU, memory, network, I/O)
+- **PostgreSQL Exporter**: Database metrics (connections, transactions, locks, replication)
+- **Redis Exporter**: Cache metrics (clients, memory, commands, keys)
 
 ### Network Architecture
 - Prometheus, Grafana connect to both `traefik-net` (for web access) and `monitoring` network
 - Node Exporter and cAdvisor only connect to `monitoring` network (internal only)
+- PostgreSQL/Redis Exporters connect to both `monitoring` and `shared-db` networks
 - Node Exporter uses `pid: host` for accurate process metrics
 
 ### Grafana Authentication
@@ -260,6 +265,8 @@ Configured in `monitoring/prometheus.yml`:
 - `node-exporter` (node-exporter:9100): Host metrics
 - `cadvisor` (cadvisor:8080): Container metrics
 - `traefik` (traefik:8082): Traefik reverse proxy metrics
+- `postgres-exporter` (postgres-exporter:9187): PostgreSQL database metrics
+- `redis-exporter` (redis-exporter:9121): Redis cache metrics
 
 ### Configuration Files
 - `monitoring/docker-compose.yml` - All monitoring services
