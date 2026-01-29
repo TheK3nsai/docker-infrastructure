@@ -1,9 +1,9 @@
-# InvoicePlane 1.6.3 - Open Source Invoicing
+# InvoicePlane 1.7.0 - Open Source Invoicing
 # ~/docker/invoiceplane/docker-compose.yml
-# Uses init container to download 1.6.3 and shared-apache for serving
+# Uses init container to download 1.7.0 and shared-apache for serving
 
 services:
-  # Init container - downloads InvoicePlane 1.6.3 and sets up code
+  # Init container - downloads InvoicePlane 1.7.0 and sets up code
   invoiceplane-init:
     image: alpine:3.21
     container_name: invoiceplane-init
@@ -15,14 +15,14 @@ services:
         echo "Checking InvoicePlane installation..."
 
         # Check if already installed
-        if [ -f /shared-code/index.php ] && [ -f /shared-code/.version ] && [ "$$(cat /shared-code/.version)" = "1.6.3" ]; then
-            echo "InvoicePlane 1.6.3 already installed"
+        if [ -f /shared-code/index.php ] && [ -f /shared-code/.version ] && [ "$$(cat /shared-code/.version)" = "1.7.0" ]; then
+            echo "InvoicePlane 1.7.0 already installed"
         else
-            echo "Downloading InvoicePlane 1.6.3..."
-            apk add --no-cache curl unzip
+            echo "Downloading InvoicePlane 1.7.0..."
+            apk add --no-cache unzip
 
-            # Download release
-            curl -L -o /tmp/invoiceplane.zip https://github.com/InvoicePlane/InvoicePlane/releases/download/v1.6.3/v1.6.3.zip
+            # Download release (wget is built into alpine busybox)
+            wget -q -O /tmp/invoiceplane.zip https://github.com/InvoicePlane/InvoicePlane/releases/download/v1.7.0/v1.7.0.zip
 
             # Extract to shared volume
             echo "Extracting..."
@@ -32,12 +32,12 @@ services:
             cp -a /tmp/ip/. /shared-code/
 
             # Mark version
-            echo "1.6.3" > /shared-code/.version
+            echo "1.7.0" > /shared-code/.version
 
             # Cleanup
             rm -rf /tmp/invoiceplane.zip /tmp/ip
 
-            echo "InvoicePlane 1.6.3 installed"
+            echo "InvoicePlane 1.7.0 installed"
         fi
 
         # Ensure ipconfig.php exists
@@ -67,7 +67,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: invoiceplane-fpm:1.6.3
+    image: invoiceplane-fpm:1.7.0
     container_name: invoiceplane
     restart: unless-stopped
     deploy:
