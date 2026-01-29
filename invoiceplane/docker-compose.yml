@@ -58,6 +58,8 @@ services:
         echo "Init complete"
     volumes:
       - invoiceplane-code:/shared-code
+    networks:
+      - shared-db
     restart: "no"
 
   # PHP-FPM container
