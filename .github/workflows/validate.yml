@@ -11,7 +11,7 @@ jobs:
     name: YAML Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install yamllint
         run: pip install yamllint
@@ -26,7 +26,7 @@ jobs:
     name: Docker Compose Validate
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Validate traefik
         run: docker compose -f traefik/docker-compose.yml config --quiet
@@ -44,7 +44,7 @@ jobs:
     name: Check for Secrets
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Check for .env files
         run: |
