@@ -5,7 +5,7 @@
 services:
   # Init container - downloads InvoicePlane 1.6.3 and sets up code
   invoiceplane-init:
-    image: php:8.1-cli-alpine
+    image: alpine:3.21
     container_name: invoiceplane-init
     entrypoint: /bin/sh
     command:
