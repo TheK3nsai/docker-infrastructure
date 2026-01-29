@@ -1,0 +1,30 @@
+# Homer - Dashboard
+# ~/docker/homer/docker-compose.yml
+
+services:
+  homer:
+    image: b4bz/homer:latest
+    container_name: homer
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 64m
+        reservations:
+          memory: 32m
+    volumes:
+      - ./config:/www/assets
+    networks:
+      - traefik-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-net"
+      - "traefik.http.routers.homer.rule=Host(`kensai.cloud`)"
+      - "traefik.http.routers.homer.entrypoints=websecure"
+      - "traefik.http.routers.homer.tls.certresolver=letsencrypt"
+      - "traefik.http.services.homer.loadbalancer.server.port=8080"
+      - "traefik.http.routers.homer.middlewares=security-headers@file"
+
+networks:
+  traefik-net:
+    external: true

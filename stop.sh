@@ -15,6 +15,7 @@ docker compose -f invoiceplane/docker-compose.yml down
 docker compose -f netbox/docker-compose.yml down
 docker compose -f zammad/docker-compose.yml down
 docker compose -f nextcloud/docker-compose.yml down
+docker compose -f homer/docker-compose.yml down
 
 log "Stopping monitoring stack..."
 docker compose -f monitoring/docker-compose.yml down

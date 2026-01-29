@@ -17,7 +17,7 @@ This is a Docker-based self-hosted infrastructure using Traefik v3 as reverse pr
 1. **traefik/** - Reverse proxy + socket-proxy (creates traefik-net and socket-proxy networks)
 2. **shared-services/** - PostgreSQL, MariaDB, Redis, Authentik, shared-apache (creates shared-db network)
 3. **monitoring/** - Prometheus, Grafana, Node Exporter, cAdvisor (creates monitoring network)
-4. **Application stacks**: nextcloud/, zammad/, netbox/, invoiceplane/, collabora/
+4. **Application stacks**: homer/, nextcloud/, zammad/, netbox/, invoiceplane/, collabora/
 
 ### Database Assignments
 - **PostgreSQL** (shared-postgres): Zammad, Authentik (including cache/sessions), NetBox
@@ -42,6 +42,7 @@ Note: Authentik 2025.10+ no longer requires Redis - caching, tasks, and WebSocke
 | Collabora | latest | Document editing |
 | Prometheus | latest (3.x) | Metrics |
 | Grafana | latest (12.x) | Dashboards |
+| Homer | latest | Dashboard homepage |
 
 ### Authentication
 Authentik provides SSO via proxy authentication: Services use the `authentik@file` middleware in Traefik (e.g., Traefik Dashboard, NetBox, InvoicePlane, Grafana).
@@ -53,6 +54,7 @@ Authentik provides SSO via proxy authentication: Services use the `authentik@fil
 docker compose -f traefik/docker-compose.yml up -d
 docker compose -f shared-services/docker-compose.yml up -d
 docker compose -f monitoring/docker-compose.yml up -d
+docker compose -f homer/docker-compose.yml up -d
 docker compose -f nextcloud/docker-compose.yml up -d
 docker compose -f zammad/docker-compose.yml up -d
 docker compose -f netbox/docker-compose.yml up -d
@@ -70,6 +72,7 @@ docker logs traefik 2>&1 | grep -i error
 ```
 
 ## Service URLs
+- Homepage: kensai.cloud (Homer dashboard)
 - Traefik Dashboard: traefik.kensai.cloud (protected by Authentik)
 - Authentik: auth.kensai.cloud
 - Prometheus: prometheus.kensai.cloud (protected by Authentik)
@@ -155,6 +158,7 @@ Apply without reboot: `sudo sysctl --system`
 | monitoring | grafana | 512m | 256m |
 | monitoring | node-exporter | 128m | 64m |
 | monitoring | cadvisor | 512m | 256m |
+| homer | homer | 64m | 32m |
 
 ## Shared Apache
 The shared-apache container in shared-services proxies requests for PHP-FPM applications:
@@ -174,9 +178,10 @@ Zammad uses direct Traefik routing (bypassing internal nginx) to avoid CSRF issu
 - **Main app**: Traefik → zammad-railsserver:3000
 - **WebSockets**: Traefik → zammad-websocket:6042 (path `/ws`)
 
-Required database settings (set automatically):
-- `http_type`: https
-- `fqdn`: tickets.kensai.cloud
+Required environment settings:
+- `ZAMMAD_HTTP_TYPE`: https
+- `ZAMMAD_FQDN`: tickets.kensai.cloud
+- `RAILS_SERVE_STATIC_FILES`: true (required since nginx is bypassed; Rails serves assets directly)
 
 ## Traefik Version Requirements
 
@@ -326,6 +331,7 @@ docker compose -f monitoring/docker-compose.yml restart grafana
 - `monitoring/grafana/provisioning/` - Grafana auto-provisioning configs
 - `monitoring/grafana/provisioning/alerting/` - File-provisioned alert rules
 - `monitoring/grafana/dashboards/` - Pre-installed Grafana dashboards
+- `homer/config/config.yml` - Homer dashboard configuration
 - `.env` files in each stack directory contain secrets
 
 ## Troubleshooting

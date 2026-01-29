@@ -15,6 +15,7 @@ x-zammad-service: &zammad-service
     ELASTICSEARCH_PORT: 9200
     ZAMMAD_HTTP_TYPE: https
     ZAMMAD_FQDN: tickets.kensai.cloud
+    RAILS_SERVE_STATIC_FILES: "true"
   volumes:
     - zammad-storage:/opt/zammad/storage
   depends_on:
