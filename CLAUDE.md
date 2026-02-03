@@ -147,9 +147,9 @@ Apply without reboot: `sudo sysctl --system`
 | nextcloud | nextcloud-cron | 128m | 64m |
 | zammad | elasticsearch | 1200m | 768m |
 | zammad | memcached | 128m | 96m |
-| zammad | railsserver | 512m | 256m |
-| zammad | scheduler | 512m | 256m |
-| zammad | websocket | 384m | 256m |
+| zammad | railsserver | 768m | 384m |
+| zammad | scheduler | 768m | 384m |
+| zammad | websocket | 512m | 256m |
 | netbox | netbox | 768m | 384m |
 | netbox | netbox-worker | 512m | 256m |
 | invoiceplane | invoiceplane | 384m | 192m |
