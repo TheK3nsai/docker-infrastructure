@@ -84,7 +84,7 @@ services:
   # Authentik Server
   # ============================================
   authentik-server:
-    image: ghcr.io/goauthentik/server:2025.12.1
+    image: ghcr.io/goauthentik/server:2025.12.3
     container_name: authentik-server
     restart: unless-stopped
     deploy:
@@ -121,7 +121,7 @@ services:
   # Authentik Worker
   # ============================================
   authentik-worker:
-    image: ghcr.io/goauthentik/server:2025.12.1
+    image: ghcr.io/goauthentik/server:2025.12.3
     container_name: authentik-worker
     restart: unless-stopped
     deploy:

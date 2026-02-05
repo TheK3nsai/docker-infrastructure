@@ -2,7 +2,7 @@
 # ~/docker/zammad/docker-compose.yml
 
 x-zammad-service: &zammad-service
-  image: ${IMAGE_REPO:-ghcr.io/zammad/zammad}:${VERSION:-6.5.2-55}
+  image: ${IMAGE_REPO:-ghcr.io/zammad/zammad}:${VERSION:-6.5.2-85}
   restart: ${RESTART:-unless-stopped}
   environment: &zammad-environment
     POSTGRESQL_HOST: shared-postgres
@@ -16,6 +16,7 @@ x-zammad-service: &zammad-service
     ZAMMAD_HTTP_TYPE: https
     ZAMMAD_FQDN: tickets.kensai.cloud
     RAILS_SERVE_STATIC_FILES: "true"
+    RAILS_TRUSTED_PROXIES: ${RAILS_TRUSTED_PROXIES:-172.16.0.0/12}
   volumes:
     - zammad-storage:/opt/zammad/storage
   depends_on:
@@ -26,7 +27,7 @@ x-zammad-service: &zammad-service
 
 services:
   zammad-elasticsearch:
-    image: elasticsearch:${ELASTICSEARCH_VERSION:-8.18.8}
+    image: elasticsearch:${ELASTICSEARCH_VERSION:-8.19.3}
     container_name: zammad-elasticsearch
     restart: ${RESTART:-unless-stopped}
     deploy:
@@ -45,7 +46,7 @@ services:
       - zammad-internal
 
   zammad-memcached:
-    image: memcached:${MEMCACHE_VERSION:-1.6-alpine}
+    image: memcached:${MEMCACHE_VERSION:-1.6.40-alpine}
     container_name: zammad-memcached
     restart: ${RESTART:-unless-stopped}
     deploy:

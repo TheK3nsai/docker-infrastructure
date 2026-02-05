@@ -34,11 +34,11 @@ Note: Authentik 2025.10+ no longer requires Redis - caching, tasks, and WebSocke
 | PostgreSQL | 18-alpine | Shared database |
 | MariaDB | 11.4 | Shared database |
 | Redis | 8.4-alpine | Shared cache |
-| Authentik | 2025.12.1 | SSO provider (no Redis needed) |
+| Authentik | 2025.12.3 | SSO provider (no Redis needed) |
 | Nextcloud | latest (32.x) | File sync |
-| Zammad | 6.5.2-55 | Ticketing |
-| Elasticsearch | 8.18.8 | Zammad search |
-| NetBox | v4.5.1 | DCIM/IPAM |
+| Zammad | 6.5.2-85 | Ticketing |
+| Elasticsearch | 8.19.3 | Zammad search |
+| NetBox | v4.5.2 | DCIM/IPAM |
 | Collabora | latest | Document editing |
 | Prometheus | latest (3.x) | Metrics |
 | Grafana | latest (12.x) | Dashboards |
