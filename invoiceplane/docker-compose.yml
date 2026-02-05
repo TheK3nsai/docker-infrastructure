@@ -1,68 +1,9 @@
 # InvoicePlane 1.7.0 - Open Source Invoicing
 # ~/docker/invoiceplane/docker-compose.yml
-# Uses init container to download 1.7.0 and shared-apache for serving
+# Entrypoint downloads 1.7.0 on first run, shared-apache serves static files
 
 services:
-  # Init container - downloads InvoicePlane 1.7.0 and sets up code
-  invoiceplane-init:
-    image: alpine:3.21
-    container_name: invoiceplane-init
-    entrypoint: /bin/sh
-    command:
-      - -c
-      - |
-        set -e
-        echo "Checking InvoicePlane installation..."
-
-        # Check if already installed
-        if [ -f /shared-code/index.php ] && [ -f /shared-code/.version ] && [ "$$(cat /shared-code/.version)" = "1.7.0" ]; then
-            echo "InvoicePlane 1.7.0 already installed"
-        else
-            echo "Downloading InvoicePlane 1.7.0..."
-            apk add --no-cache unzip
-
-            # Download release (wget is built into alpine busybox)
-            wget -q -O /tmp/invoiceplane.zip https://github.com/InvoicePlane/InvoicePlane/releases/download/v1.7.0/v1.7.0.zip
-
-            # Extract to shared volume
-            echo "Extracting..."
-            unzip -q /tmp/invoiceplane.zip -d /tmp/
-
-            # Copy files (the zip extracts to 'ip' directory)
-            cp -a /tmp/ip/. /shared-code/
-
-            # Mark version
-            echo "1.7.0" > /shared-code/.version
-
-            # Cleanup
-            rm -rf /tmp/invoiceplane.zip /tmp/ip
-
-            echo "InvoicePlane 1.7.0 installed"
-        fi
-
-        # Ensure ipconfig.php exists
-        if [ ! -f /shared-code/ipconfig.php ] && [ -f /shared-code/ipconfig.php.example ]; then
-            cp /shared-code/ipconfig.php.example /shared-code/ipconfig.php
-            echo "Created ipconfig.php from example"
-        fi
-
-        # Set permissions
-        echo "Setting permissions..."
-        chown -R 33:33 /shared-code
-        chmod -R o+rX /shared-code
-
-        # Ensure uploads directory exists and is writable
-        mkdir -p /shared-code/uploads
-        chmod 775 /shared-code/uploads
-
-        echo "Init complete"
-    volumes:
-      - invoiceplane-code:/shared-code
-    networks:
-      - shared-db
-    restart: "no"
-
-  # PHP-FPM container
+  # PHP-FPM container (entrypoint handles init/download on first run)
   invoiceplane:
     build:
       context: .
@@ -81,9 +22,6 @@ services:
       - invoiceplane-uploads:/var/www/invoiceplane/uploads
     environment:
       - TZ=UTC
-    depends_on:
-      invoiceplane-init:
-        condition: service_completed_successfully
     networks:
       - shared-db
 

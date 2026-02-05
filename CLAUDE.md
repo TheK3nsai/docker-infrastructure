@@ -170,7 +170,7 @@ Configuration files are in `shared-services/apache/`:
 - `httpd.conf` - Main Apache configuration (based on default with proxy modules enabled)
 - `sites-enabled/invoiceplane.conf` - InvoicePlane virtual host
 
-InvoicePlane uses an init container pattern to download code and share it between PHP-FPM and Apache via the `invoiceplane-code` volume.
+InvoicePlane's PHP-FPM entrypoint handles downloading the code on first run, sharing it with Apache via the `invoiceplane-code` volume.
 
 To add a new app to shared-apache, create a new `.conf` file in `sites-enabled/` and reload: `docker exec shared-apache httpd -k graceful`
 

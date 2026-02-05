@@ -9,6 +9,8 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     libicu-dev \
     libonig-dev \
+    unzip \
+    wget \
     && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions required by InvoicePlane
@@ -42,3 +44,8 @@ RUN { \
     } > /usr/local/etc/php/conf.d/invoiceplane.ini
 
 WORKDIR /var/www/invoiceplane
+
+# Copy init/entrypoint script
+COPY entrypoint.sh /usr/local/bin/invoiceplane-entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/invoiceplane-entrypoint.sh"]
