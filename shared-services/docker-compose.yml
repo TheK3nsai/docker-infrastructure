@@ -32,7 +32,7 @@ services:
   # MariaDB - Nextcloud, future apps
   # ============================================
   mariadb:
-    image: mariadb:11.4
+    image: mariadb:11.8
     container_name: shared-mariadb
     restart: unless-stopped
     deploy:

@@ -1,5 +1,5 @@
 # InvoicePlane PHP-FPM with required extensions (Debian-based for GLOB_BRACE support)
-FROM php:8.2-fpm
+FROM php:8.4-fpm
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
@@ -31,7 +31,6 @@ RUN { \
     echo 'opcache.interned_strings_buffer=8'; \
     echo 'opcache.max_accelerated_files=4000'; \
     echo 'opcache.revalidate_freq=60'; \
-    echo 'opcache.fast_shutdown=1'; \
     } > /usr/local/etc/php/conf.d/opcache-recommended.ini
 
 # Set recommended PHP settings

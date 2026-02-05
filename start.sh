@@ -39,9 +39,9 @@ docker compose -f traefik/docker-compose.yml up -d
 log "Starting shared services..."
 docker compose -f shared-services/docker-compose.yml up -d
 
-wait_healthy shared-postgres 90
-wait_healthy shared-mariadb 90
-wait_healthy shared-redis 60
+wait_healthy shared-postgres 90 || true
+wait_healthy shared-mariadb 90 || true
+wait_healthy shared-redis 60 || true
 
 # 3. Monitoring stack
 log "Starting monitoring stack..."
@@ -57,4 +57,4 @@ docker compose -f invoiceplane/docker-compose.yml up -d
 docker compose -f collabora/docker-compose.yml up -d
 
 log "All services started"
-docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | head -20
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | head -30

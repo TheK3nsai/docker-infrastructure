@@ -22,6 +22,9 @@ CONTAINERS=(
     "grafana"
     "node-exporter"
     "cadvisor"
+    "postgres-exporter"
+    "redis-exporter"
+    "homer"
     "nextcloud"
     "nextcloud-cron"
     "zammad-elasticsearch"
@@ -77,6 +80,7 @@ echo -e "  Unhealthy: ${RED}$unhealthy${NC}"
 echo -e "  Total:     $((healthy + unhealthy))"
 
 echo -e "\n${CYAN}=== Service URLs ===${NC}\n"
+echo "  Homepage:     https://kensai.cloud"
 echo "  Traefik:      https://traefik.kensai.cloud"
 echo "  Authentik:    https://auth.kensai.cloud"
 echo "  Prometheus:   https://prometheus.kensai.cloud"
@@ -88,6 +92,6 @@ echo "  InvoicePlane: https://invoices.kensai.cloud"
 echo "  Collabora:    https://office.kensai.cloud"
 
 echo -e "\n${CYAN}=== Resource Usage ===${NC}\n"
-docker stats --no-stream --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}" | head -20
+docker stats --no-stream --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}" | head -30
 
 exit $unhealthy

@@ -32,12 +32,12 @@ Note: Authentik 2025.10+ no longer requires Redis - caching, tasks, and WebSocke
 | Traefik | v3.6.7 | Reverse proxy |
 | Socket Proxy | v0.4.2 | Docker socket security |
 | PostgreSQL | 18-alpine | Shared database |
-| MariaDB | 11.4 | Shared database |
+| MariaDB | 11.8 | Shared database (LTS) |
 | Redis | 8.4-alpine | Shared cache |
 | Authentik | 2025.12.3 | SSO provider (no Redis needed) |
 | Nextcloud | latest (32.x) | File sync |
 | Zammad | 6.5.2-85 | Ticketing |
-| Elasticsearch | 8.19.3 | Zammad search |
+| Elasticsearch | 8.19.11 | Zammad search |
 | NetBox | v4.5.2 | DCIM/IPAM |
 | Collabora | latest | Document editing |
 | Prometheus | latest (3.x) | Metrics |

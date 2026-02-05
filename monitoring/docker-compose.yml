@@ -130,11 +130,8 @@ services:
     networks:
       - monitoring
       - shared-db
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9121/metrics"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+    # Note: no healthcheck - scratch-based image has no shell tools
+    # Prometheus scrape target monitoring serves as health indicator
 
   grafana:
     image: grafana/grafana:latest
