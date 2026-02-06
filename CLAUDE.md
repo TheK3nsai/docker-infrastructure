@@ -38,7 +38,7 @@ Note: Authentik 2025.10+ no longer requires Redis - caching, tasks, and WebSocke
 | Nextcloud | latest (32.x) | File sync |
 | Zammad | 6.5.2-85 | Ticketing |
 | Elasticsearch | 8.19.11 | Zammad search |
-| NetBox | v4.5.2 | DCIM/IPAM |
+| NetBox | v4.5.2 | DCIM/IPAM (2 granian workers) |
 | Collabora | latest | Document editing |
 | Prometheus | latest (3.x) | Metrics |
 | Grafana | latest (12.x) | Dashboards |
@@ -348,6 +348,9 @@ Zammad requires `http_type=https` and `fqdn=tickets.kensai.cloud` in the databas
 
 ### InvoicePlane Setup Loop
 InvoicePlane checks `SETUP_COMPLETED=true` in `ipconfig.php` (not in database). Ensure this is set after completing setup wizard.
+
+### NetBox High Memory Usage
+NetBox uses granian (WSGI server) which defaults to 4 workers (`nproc`). Each worker consumes ~150-220MB. Set `GRANIAN_WORKERS: 2` in the environment to reduce memory usage for single-user deployments. The launch script reads `${GRANIAN_WORKERS:-4}`.
 
 ### Container Health Issues
 ```bash
