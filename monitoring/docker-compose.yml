@@ -169,7 +169,6 @@ services:
       - grafana-data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
       - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
-      - ./grafana/provisioning/alerting:/etc/grafana/provisioning/alerting:ro
     networks:
       - traefik-net
       - monitoring
