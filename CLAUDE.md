@@ -26,20 +26,22 @@ This is a Docker-based self-hosted infrastructure using Traefik v3 as reverse pr
 
 Note: Authentik 2025.10+ no longer requires Redis - caching, tasks, and WebSockets are handled by PostgreSQL.
 
-### Service Versions (as of January 2026)
+### Service Versions (as of February 2026)
 | Service | Version | Notes |
 |---------|---------|-------|
-| Traefik | v3.6.7 | Reverse proxy |
+| Traefik | v3.6.8 | Reverse proxy |
 | Socket Proxy | v0.4.2 | Docker socket security |
 | PostgreSQL | 18-alpine | Shared database |
 | MariaDB | 11.8 | Shared database (LTS) |
-| Redis | 8.4-alpine | Shared cache |
+| Redis | latest (8.6) | Shared cache |
 | Authentik | 2025.12.3 | SSO provider (no Redis needed) |
 | Nextcloud | latest (32.x) | File sync |
 | Zammad | 6.5.2-85 | Ticketing |
 | Elasticsearch | 8.19.11 | Zammad search |
+| Memcached | latest | Zammad session cache |
 | NetBox | v4.5.2 | DCIM/IPAM (2 granian workers) |
 | Collabora | latest | Document editing |
+| Apache (httpd) | latest | Shared PHP-FPM proxy |
 | Prometheus | latest (3.x) | Metrics |
 | Grafana | latest (12.x) | Dashboards |
 | Homer | latest | Dashboard homepage |
@@ -338,6 +340,7 @@ docker compose -f monitoring/docker-compose.yml restart grafana
 - `monitoring/grafana/provisioning/` - Grafana auto-provisioning configs
 - `monitoring/grafana/provisioning/alerting/` - File-provisioned alert rules
 - `monitoring/grafana/dashboards/` - Pre-installed Grafana dashboards
+- `netbox/extra.py` - NetBox extra config (API_TOKEN_PEPPERS for v2 API tokens)
 - `homer/config/config.yml` - Homer dashboard configuration
 - `.env` files in each stack directory contain secrets
 
@@ -348,6 +351,9 @@ Zammad requires `http_type=https` and `fqdn=tickets.kensai.cloud` in the databas
 
 ### InvoicePlane Setup Loop
 InvoicePlane checks `SETUP_COMPLETED=true` in `ipconfig.php` (not in database). Ensure this is set after completing setup wizard.
+
+### NetBox API Token Peppers
+NetBox v4.5+ requires `API_TOKEN_PEPPERS` to create v2 API tokens. This is configured in `netbox/extra.py` (bind-mounted into both `netbox` and `netbox-worker` containers at `/etc/netbox/config/extra.py`). Keys must be integers, not strings: `{2: 'hex-string'}`.
 
 ### NetBox High Memory Usage
 NetBox uses granian (WSGI server) which defaults to 4 workers (`nproc`). Each worker consumes ~150-220MB. Set `GRANIAN_WORKERS: 2` in the environment to reduce memory usage for single-user deployments. The launch script reads `${GRANIAN_WORKERS:-4}`.

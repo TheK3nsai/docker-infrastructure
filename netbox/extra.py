@@ -1,0 +1,3 @@
+API_TOKEN_PEPPERS = {
+    2: 'd5616ef4d581dd7b00eb12bd01f77d0905b1fdb6ae295ce4e9c60ace4ad9ea47',
+}
