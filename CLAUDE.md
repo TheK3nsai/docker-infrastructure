@@ -49,6 +49,8 @@ Note: Authentik 2025.10+ no longer requires Redis - caching, tasks, and WebSocke
 ### Authentication
 Authentik provides SSO via proxy authentication: Services use the `authentik@file` middleware in Traefik (e.g., Traefik Dashboard, NetBox, InvoicePlane, Grafana).
 
+**NetBox API bypass**: The `/api/` path on `netbox.kensai.cloud` has a separate Traefik router (`netbox-api`) that skips Authentik. NetBox handles API authentication natively via token headers (`Authorization: Token <token>`). This allows scripts and automation to use the REST API without SSO interference.
+
 ## Common Commands
 
 ```bash

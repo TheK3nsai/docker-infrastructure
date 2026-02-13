@@ -43,11 +43,18 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik-net"
+      # Web UI - protected by Authentik SSO
       - "traefik.http.routers.netbox.rule=Host(`netbox.kensai.cloud`)"
       - "traefik.http.routers.netbox.entrypoints=websecure"
       - "traefik.http.routers.netbox.tls.certresolver=letsencrypt"
-      - "traefik.http.services.netbox.loadbalancer.server.port=8080"
       - "traefik.http.routers.netbox.middlewares=authentik@file,security-headers@file"
+      # API - bypasses Authentik (NetBox handles token auth natively)
+      - "traefik.http.routers.netbox-api.rule=Host(`netbox.kensai.cloud`) && PathPrefix(`/api/`)"
+      - "traefik.http.routers.netbox-api.entrypoints=websecure"
+      - "traefik.http.routers.netbox-api.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.netbox-api.middlewares=security-headers@file"
+      - "traefik.http.routers.netbox-api.service=netbox"
+      - "traefik.http.services.netbox.loadbalancer.server.port=8080"
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://localhost:8080/login/"]
       interval: 30s
