@@ -28,7 +28,7 @@ services:
 
   traefik:
     # v3.6.7+ required for encoded slash support with Collabora (GitHub PR #12540)
-    image: traefik:v3.6.7
+    image: traefik:v3.6.8
     container_name: traefik
     restart: unless-stopped
     security_opt:

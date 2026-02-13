@@ -61,7 +61,7 @@ services:
   # Redis - Nextcloud, Zammad, NetBox
   # ============================================
   redis:
-    image: redis:8.4-alpine
+    image: redis:latest
     container_name: shared-redis
     restart: unless-stopped
     deploy:
@@ -151,7 +151,7 @@ services:
   # Shared Apache - Reverse proxy for PHP-FPM apps
   # ============================================
   apache:
-    image: httpd:2.4-alpine
+    image: httpd:latest
     container_name: shared-apache
     restart: unless-stopped
     deploy:

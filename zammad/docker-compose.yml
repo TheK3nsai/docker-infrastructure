@@ -46,7 +46,7 @@ services:
       - zammad-internal
 
   zammad-memcached:
-    image: memcached:${MEMCACHE_VERSION:-1.6.40-alpine}
+    image: memcached:latest
     container_name: zammad-memcached
     restart: ${RESTART:-unless-stopped}
     deploy:
