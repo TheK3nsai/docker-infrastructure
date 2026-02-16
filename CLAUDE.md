@@ -33,17 +33,17 @@ Note: Authentik 2025.10+ no longer requires Redis - caching, tasks, and WebSocke
 | Socket Proxy | v0.4.2 | Docker socket security |
 | PostgreSQL | 18-alpine | Shared database |
 | MariaDB | 11.8 | Shared database (LTS) |
-| Redis | latest (8.6) | Shared cache |
+| Redis | latest (8.6.0) | Shared cache |
 | Authentik | 2025.12.3 | SSO provider (no Redis needed) |
-| Nextcloud | latest (32.x) | File sync |
+| Nextcloud | latest (32.0.6) | File sync |
 | Zammad | 6.5.2-85 | Ticketing |
 | Elasticsearch | 8.19.11 | Zammad search |
 | Memcached | latest | Zammad session cache |
 | NetBox | v4.5.2 | DCIM/IPAM (2 granian workers) |
-| Collabora | latest | Document editing |
+| Collabora | latest (25.04.8) | Document editing |
 | Apache (httpd) | latest | Shared PHP-FPM proxy |
-| Prometheus | latest (3.x) | Metrics |
-| Grafana | latest (12.x) | Dashboards |
+| Prometheus | latest (3.9.1) | Metrics |
+| Grafana | latest (12.3.1) | Dashboards |
 | Homer | latest | Dashboard homepage |
 
 ### Authentication
@@ -151,6 +151,7 @@ Apply without reboot: `sudo sysctl --system`
 | nextcloud | nextcloud-cron | 128m | 64m |
 | zammad | elasticsearch | 1200m | 768m |
 | zammad | memcached | 128m | 96m |
+| zammad | init | 512m | 256m |
 | zammad | railsserver | 768m | 384m |
 | zammad | scheduler | 768m | 384m |
 | zammad | websocket | 512m | 256m |
@@ -251,6 +252,7 @@ GF_AUTH_PROXY_HEADER_PROPERTY=username
 GF_AUTH_PROXY_AUTO_SIGN_UP=true
 GF_AUTH_PROXY_HEADERS=Email:X-authentik-email Name:X-authentik-name
 GF_AUTH_PROXY_WHITELIST=172.19.0.0/24
+GF_AUTH_PROXY_ENABLE_LOGIN_TOKEN=false
 
 # Disable native login (Authentik handles auth)
 GF_AUTH_DISABLE_LOGIN_FORM=true
