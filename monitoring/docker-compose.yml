@@ -40,9 +40,9 @@ services:
     deploy:
       resources:
         limits:
-          memory: 128m
-        reservations:
           memory: 64m
+        reservations:
+          memory: 32m
     command:
       - '--path.procfs=/host/proc'
       - '--path.sysfs=/host/sys'
@@ -63,9 +63,9 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512m
+          memory: 384m
         reservations:
-          memory: 256m
+          memory: 192m
     command:
       - '--housekeeping_interval=15s'    # Reduce sampling frequency (default 1s)
       - '--docker_only=true'              # Only monitor Docker containers
@@ -140,9 +140,9 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512m
+          memory: 384m
         reservations:
-          memory: 256m
+          memory: 192m
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
       - GF_USERS_ALLOW_SIGN_UP=false

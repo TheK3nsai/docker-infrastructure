@@ -39,9 +39,9 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512m
-        reservations:
           memory: 256m
+        reservations:
+          memory: 128m
     command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -91,9 +91,9 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1g
+          memory: 768m
         reservations:
-          memory: 512m
+          memory: 384m
     command: server
     environment:
       AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY}

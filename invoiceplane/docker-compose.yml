@@ -14,9 +14,9 @@ services:
     deploy:
       resources:
         limits:
-          memory: 384m
+          memory: 128m
         reservations:
-          memory: 192m
+          memory: 64m
     volumes:
       - invoiceplane-code:/var/www/invoiceplane
       - invoiceplane-uploads:/var/www/invoiceplane/uploads

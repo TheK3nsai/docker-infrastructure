@@ -36,9 +36,9 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512m
-        reservations:
           memory: 256m
+        reservations:
+          memory: 128m
     depends_on:
       - socket-proxy
     command:
