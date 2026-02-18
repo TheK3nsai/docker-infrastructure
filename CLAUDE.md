@@ -144,11 +144,11 @@ Apply without reboot: `sudo sysctl --system`
 | shared-services | postgres | 512m | 256m |
 | shared-services | mariadb | 256m | 128m |
 | shared-services | redis | 128m | 64m |
-| shared-services | authentik-server | 768m | 384m |
+| shared-services | authentik-server | 1g | 512m |
 | shared-services | authentik-worker | 768m | 384m |
 | shared-services | apache | 128m | 64m |
 | nextcloud | nextcloud | 512m | 256m |
-| nextcloud | nextcloud-cron | 64m | 32m |
+| nextcloud | nextcloud-cron | 256m | 128m |
 | zammad | elasticsearch | 1200m | 768m |
 | zammad | memcached | 96m | 48m |
 | zammad | init | 512m | 256m |

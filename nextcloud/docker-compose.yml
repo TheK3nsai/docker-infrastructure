@@ -47,9 +47,9 @@ services:
     deploy:
       resources:
         limits:
-          memory: 64m
+          memory: 256m
         reservations:
-          memory: 32m
+          memory: 128m
     volumes:
       - nextcloud-data:/var/www/html
     entrypoint: /cron.sh

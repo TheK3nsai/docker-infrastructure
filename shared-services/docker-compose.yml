@@ -91,9 +91,9 @@ services:
     deploy:
       resources:
         limits:
-          memory: 768m
+          memory: 1g
         reservations:
-          memory: 384m
+          memory: 512m
     command: server
     environment:
       AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY}
