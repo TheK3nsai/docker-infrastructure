@@ -2,7 +2,7 @@
 # ~/docker/zammad/docker-compose.yml
 
 x-zammad-service: &zammad-service
-  image: ${IMAGE_REPO:-ghcr.io/zammad/zammad}:${VERSION:-6.5.2-85}
+  image: ${IMAGE_REPO:-ghcr.io/zammad/zammad}:${VERSION:-6.5.2-89}
   restart: ${RESTART:-unless-stopped}
   environment: &zammad-environment
     POSTGRESQL_HOST: shared-postgres
