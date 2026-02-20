@@ -58,6 +58,42 @@ services:
     networks:
       - shared-db
 
+  # Client Push (notify_push) - Rust daemon replacing client polling with WebSocket push
+  # Setup: docker exec -u www-data nextcloud php occ app:install notify_push
+  #        docker compose -f nextcloud/docker-compose.yml up -d notify-push
+  #        docker exec -u www-data nextcloud php occ notify_push:setup https://cloud.kensai.cloud/push
+  notify-push:
+    image: nextcloud:latest
+    container_name: nextcloud-notify-push
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 128m
+        reservations:
+          memory: 64m
+    volumes:
+      - nextcloud-data:/var/www/html:ro
+    environment:
+      - PORT=7867
+      - NEXTCLOUD_URL=http://nextcloud
+    entrypoint: /var/www/html/custom_apps/notify_push/bin/x86_64/notify_push
+    command: /var/www/html/config/config.php
+    depends_on:
+      - nextcloud
+    networks:
+      - shared-db
+      - traefik-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-net"
+      - "traefik.http.routers.nextcloud-push.rule=Host(`cloud.kensai.cloud`) && PathPrefix(`/push`)"
+      - "traefik.http.routers.nextcloud-push.entrypoints=websecure"
+      - "traefik.http.routers.nextcloud-push.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.nextcloud-push.middlewares=nextcloud-push-strip,security-headers@file"
+      - "traefik.http.middlewares.nextcloud-push-strip.stripprefix.prefixes=/push"
+      - "traefik.http.services.nextcloud-push.loadbalancer.server.port=7867"
+
 volumes:
   nextcloud-data:
 

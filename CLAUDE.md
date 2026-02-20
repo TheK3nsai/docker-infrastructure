@@ -36,6 +36,7 @@ Note: Authentik 2025.10+ no longer requires Redis - caching, tasks, and WebSocke
 | Redis | latest (8.6.0) | Shared cache |
 | Authentik | 2025.12.3 | SSO provider (no Redis needed) |
 | Nextcloud | latest (32.0.6) | File sync |
+| Notify Push | (bundled with Nextcloud) | Client Push via WebSocket (Rust daemon) |
 | Zammad | 6.5.2-85 | Ticketing |
 | Elasticsearch | 8.19.11 | Zammad search |
 | Memcached | latest | Zammad session cache |
@@ -149,6 +150,7 @@ Apply without reboot: `sudo sysctl --system`
 | shared-services | apache | 128m | 64m |
 | nextcloud | nextcloud | 512m | 256m |
 | nextcloud | nextcloud-cron | 256m | 128m |
+| nextcloud | notify-push | 128m | 64m |
 | zammad | elasticsearch | 1200m | 768m |
 | zammad | memcached | 96m | 48m |
 | zammad | init | 512m | 256m |
@@ -355,6 +357,20 @@ Zammad requires `http_type=https` and `fqdn=tickets.kensai.cloud` in the databas
 
 ### InvoicePlane Setup Loop
 InvoicePlane checks `SETUP_COMPLETED=true` in `ipconfig.php` (not in database). Ensure this is set after completing setup wizard.
+
+### Nextcloud Notify Push (Client Push)
+The `notify-push` container is a lightweight Rust daemon that replaces client polling with WebSocket push notifications. Clients connect once via WebSocket and receive instant change notifications via Redis pub/sub, eliminating the 30-second polling cycle.
+
+**Setup (one-time, after first deploy):**
+```bash
+docker exec -u www-data nextcloud php occ app:install notify_push
+docker compose -f nextcloud/docker-compose.yml up -d notify-push
+docker exec -u www-data nextcloud php occ notify_push:setup https://cloud.kensai.cloud/push
+```
+
+**Traefik routing**: The `/push` path on `cloud.kensai.cloud` routes to `nextcloud-notify-push:7867` with a `stripprefix` middleware removing `/push` before forwarding.
+
+**Verify**: `docker exec -u www-data nextcloud php occ notify_push:self-test`
 
 ### NetBox API Token Peppers
 NetBox v4.5+ requires `API_TOKEN_PEPPERS` to create v2 API tokens. This is configured in `netbox/extra.py` (bind-mounted into both `netbox` and `netbox-worker` containers at `/etc/netbox/config/extra.py`). Keys must be integers, not strings: `{2: 'hex-string'}`.

@@ -27,6 +27,7 @@ CONTAINERS=(
     "homer"
     "nextcloud"
     "nextcloud-cron"
+    "nextcloud-notify-push"
     "zammad-elasticsearch"
     "zammad-memcached"
     "zammad-railsserver"
